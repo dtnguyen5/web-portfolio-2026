@@ -1,12 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { contact, experience, tools } from "@/data/portfolio";
 import Arrow from "./Arrow";
 import ProjectList from "./ProjectList";
 import SectionLabel from "./SectionLabel";
 import ServiceList from "./ServiceList";
+import SmoothCursor from "./SmoothCursor";
 
 const contentPadding = "px-6 sm:px-[5.56vw]";
 const buttonClass =
@@ -15,18 +16,80 @@ const buttonClass =
 const Portfolio = () => {
   const [sent, setSent] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  useEffect(() => {
+    const revealItems = document.querySelectorAll<HTMLElement>(".about-reveal");
+    const sectionRevealItems =
+      document.querySelectorAll<HTMLElement>(".scroll-reveal-section");
+
+    if (!("IntersectionObserver" in window)) {
+      revealItems.forEach((item) => item.classList.add("is-visible"));
+      sectionRevealItems.forEach((item) => item.classList.add("is-visible"));
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.18 },
+    );
+
+    revealItems.forEach((item) => observer.observe(item));
+
+    const sectionObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("is-visible");
+            sectionObserver.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.08, rootMargin: "0px 0px -8% 0px" },
+    );
+
+    sectionRevealItems.forEach((item) => sectionObserver.observe(item));
+
+    const revealSectionsOnScroll = () => {
+      sectionRevealItems.forEach((item) => {
+        if (item.getBoundingClientRect().top < window.innerHeight * 0.92) {
+          item.classList.add("is-visible");
+        }
+      });
+    };
+
+    revealSectionsOnScroll();
+    window.addEventListener("scroll", revealSectionsOnScroll, {
+      passive: true,
+    });
+
+    return () => {
+      observer.disconnect();
+      sectionObserver.disconnect();
+      window.removeEventListener("scroll", revealSectionsOnScroll);
+    };
+  }, []);
+
   const submitForm = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSent(true);
   };
 
   return (
-    <main className="overflow-hidden">
+    <>
+      <SmoothCursor />
+      <main className="overflow-x-clip">
       <section
-        className={`${contentPadding} min-h-screen bg-[#080808] pb-0 pt-5 sm:pt-7`}
+        className={`scroll-stack-section scroll-stack-section-01 ${contentPadding} min-h-screen bg-[#080808] pb-0 pt-[54px] sm:pt-[88px]`}
         id="domu"
       >
-        <nav className="hero-reveal flex h-[44px] items-center justify-between sm:h-[76px] sm:justify-center">
+        <nav className="hero-reveal fixed inset-x-0 top-5 z-50 flex h-[44px] items-center justify-between bg-transparent px-6 sm:top-8 sm:h-[76px] sm:justify-center sm:px-[5.56vw]">
           <a className="sm:hidden" href="#domu" aria-label="Domů">
             <Image
               src="/Osobní značka.svg"
@@ -35,16 +98,16 @@ const Portfolio = () => {
               height={34}
             />
           </a>
-          <div className="hidden items-center gap-9 rounded-full border border-[#1f1f1f] px-3.5 py-3 text-lg font-medium text-[#f1f0ec] sm:flex sm:w-[570px] sm:justify-center">
+          <div className="hidden items-center gap-6 rounded-full border border-[#1f1f1f] bg-[#080808] px-3 py-2.5 text-base font-medium text-[#f1f0ec] sm:flex sm:w-[470px] sm:justify-center">
             <a href="#domu" aria-label="Domů">
               <Image
                 src="/Osobní značka.svg"
                 alt="Honza"
-                width={34}
-                height={34}
+                width={30}
+                height={30}
               />
             </a>
-            <div className="flex items-center gap-8">
+            <div className="flex items-center gap-6">
               <a className="hover:text-[#a5a5a2]" href="#domu">
                 Domů
               </a>
@@ -56,7 +119,7 @@ const Portfolio = () => {
               </a>
             </div>
             <a
-              className="rounded-full bg-[#1f1f1f] px-7 py-3 hover:bg-[#30302e]"
+              className="rounded-full bg-[#1f1f1f] px-5 py-2.5 hover:bg-[#30302e]"
               href="#kontakt"
             >
               Napište mi
@@ -94,45 +157,48 @@ const Portfolio = () => {
             ))}
           </div>
         )}
-        <div className="hero-reveal flex flex-col gap-7 pb-0 pt-7 font-mono text-xs leading-6 text-[#a5a5a2] [animation-delay:150ms] sm:flex-row sm:items-center sm:justify-between sm:pb-[30px] sm:pt-16">
+        <div className="hero-reveal hero-meta flex flex-col gap-7 pb-0 pt-7 font-mono text-xs leading-6 text-[#a5a5a2] sm:flex-row sm:items-center sm:justify-between sm:pb-[30px] sm:pt-16">
           <span>WEB DESIGN / DEVELOPMENT / GRAFIKA</span>
         </div>
         <div className="pb-8 pt-10 font-medium tracking-[-.06em] sm:pb-14 sm:pt-0">
           <h1 className="m-0 text-[clamp(45px,8.25vw,119px)] leading-[1.08]">
-            <span className="hero-title-line">
+            <span className="hero-title-line hero-title-line-primary" aria-label="AHOJ, JSEM HONZA">
               <span>AHOJ, JSEM HONZA</span>
             </span>
           </h1>
           <p className="m-0 text-[clamp(45px,7.64vw,110px)] leading-[1.13] text-[#a5a5a2]">
-            <span className="hero-title-line">
+            <span className="hero-title-line hero-title-line-secondary" aria-label="DESIGNÉR">
               <span>DESIGNÉR</span>
             </span>
-            <span className="hero-title-line">
+            <span
+              className="hero-title-line hero-title-line-tertiary"
+              aria-label="& WEB DEVELOPER"
+            >
               <span>&amp; WEB DEVELOPER</span>
             </span>
           </p>
         </div>
-        <div className="hero-line-reveal h-px bg-[#30302e] [animation-delay:450ms]" />
-        <div className="hero-reveal flex flex-col gap-6 py-7 text-lg leading-6 [animation-delay:550ms] sm:flex-row sm:justify-between sm:py-8 sm:text-xl sm:leading-7">
-          <p className="m-0">
+        <div className="hero-line-reveal h-px bg-[#30302e]" aria-hidden="true" />
+        <div className="flex flex-col gap-6 py-7 text-lg leading-6 sm:flex-row sm:justify-between sm:py-8 sm:text-xl sm:leading-7">
+          <p className="hero-reveal hero-info-left m-0">
             Působím v Plzni.
             <br />
             Otevřený novým projektům a spolupráci.
           </p>
-          <p className="m-0 text-[#a5a5a2] sm:w-[32%]">
+          <p className="hero-reveal hero-info-right m-0 text-[#a5a5a2] sm:w-[32%]">
             Designér a web developer tvořící čistá rozhraní a moderní weby.
           </p>
         </div>
       </section>
 
       <section
-        className={`${contentPadding} bg-[#111] pb-20 pt-16 sm:pb-28`}
+        className={`scroll-reveal-section scroll-stack-section-02 ${contentPadding} bg-[#111] pb-20 pt-16 sm:pb-28`}
         id="o-mne"
       >
         <SectionLabel>O MNĚ</SectionLabel>
         <div className="mt-10 grid gap-10 sm:mt-12 sm:grid-cols-[520px_1fr] sm:gap-[6.67vw]">
-          <div>
-            <div className="relative h-[440px] overflow-hidden rounded-2xl sm:h-[680px]">
+          <div className="about-sidebar">
+            <div className="about-sidebar-image relative h-[440px] overflow-hidden rounded-2xl sm:h-[680px]">
               <Image
                 className="object-cover"
                 src="/workspace.png"
@@ -150,10 +216,10 @@ const Portfolio = () => {
               </div>
             </div>
           </div>
-          <div>
-            <article className="border-t border-[#30302e] py-6 sm:pb-16 sm:pt-8 sm:pr-12">
+          <div className="about-content">
+            <article className="about-reveal border-t border-[#30302e] py-6 sm:pb-16 sm:pt-8 sm:pr-12">
               <SectionLabel>01 / 03</SectionLabel>
-              <h2 className="my-5 text-[38px] leading-tight tracking-[-.05em] sm:text-[76px]">
+              <h2 className="my-5 text-[38px] leading-tight tracking-[-.05em] sm:text-[52px]">
                 Kdo jsem
               </h2>
               <p className="m-0 max-w-[970px] text-lg leading-[1.55] text-[#a5a5a2]">
@@ -165,7 +231,7 @@ const Portfolio = () => {
                 bezproblémový výsledek.
               </p>
             </article>
-            <article className="border-t border-[#30302e] py-6 sm:pb-14 sm:pt-10">
+            <article className="about-reveal border-t border-[#30302e] py-6 !pb-0 sm:pt-10">
               <SectionLabel>02 / 03</SectionLabel>
               <h2 className="my-5 text-[38px] leading-tight tracking-[-.05em] sm:text-[52px]">
                 Škola &amp; praxe
@@ -183,28 +249,35 @@ const Portfolio = () => {
                   ))}
                 </p>
               </div>
-              {experience.jobs.map((job) => (
-                <div className="mt-8" key={job.title}>
+              <div className="mt-8">
+                {experience.jobs.map((job) => (
+                <div
+                  className="border-t border-[#30302e] py-6 sm:py-7"
+                  key={job.title}
+                >
                   <SectionLabel>{job.label}</SectionLabel>
-                  <h3 className="mt-3 border-t border-[#30302e] pt-4 text-2xl">
+                  <h3 className="mt-4 text-3xl leading-tight sm:text-[34px]">
                     {job.title}
                   </h3>
-                  <p className="m-0 text-lg text-[#a5a5a2]">
+                  <p className="m-0 mt-3 text-xl text-[#a5a5a2] sm:text-[28px]">
                     {job.description}
                   </p>
                 </div>
-              ))}
+                ))}
+              </div>
             </article>
-            <article className="border-t border-[#30302e] py-6 sm:pt-10">
+            <article className="pt-0">
+              <div className="mb-7 h-px bg-[#30302e]" />
               <SectionLabel>03 / 03</SectionLabel>
-              <h2 className="my-5 text-[38px] tracking-[-.05em] sm:text-[52px]">
+              <h2 className="my-5 text-[38px] leading-tight tracking-[-.05em] sm:text-[52px]">
                 Nástroje
               </h2>
               <div className="flex flex-wrap gap-2.5">
                 {tools.map((tool) => (
                   <span
-                    className="rounded-full border border-[#30302e] px-4 py-2.5 text-[#a5a5a2]"
+                    className="cursor-default rounded-full border border-[#30302e] px-4 py-2.5 text-[#a5a5a2] transition-colors duration-300 hover:border-[#f1f0ec] hover:bg-[#f1f0ec] hover:text-[#080808] focus-visible:border-[#f1f0ec] focus-visible:bg-[#f1f0ec] focus-visible:text-[#080808]"
                     key={tool}
+                    tabIndex={0}
                   >
                     {tool}
                   </span>
@@ -216,7 +289,7 @@ const Portfolio = () => {
       </section>
 
       <section
-        className={`${contentPadding} pb-20 pt-20 sm:pb-28 sm:pt-28`}
+        className={`scroll-reveal-section scroll-stack-section-03 ${contentPadding} bg-[#080808] pb-20 pt-20 sm:pb-28 sm:pt-28`}
         id="sluzby"
       >
         <div className="max-w-[650px]">
@@ -229,7 +302,7 @@ const Portfolio = () => {
       </section>
 
       <section
-        className={`${contentPadding} bg-[#111] pb-20 pt-16 sm:pb-28 sm:pt-24`}
+        className={`scroll-reveal-section scroll-stack-section-04 ${contentPadding} bg-[#111] pb-20 pt-16 sm:pb-28 sm:pt-24`}
         id="projekty"
       >
         <SectionLabel number="03">PROJEKTY</SectionLabel>
@@ -239,7 +312,7 @@ const Portfolio = () => {
         <ProjectList />
       </section>
 
-      <section className="relative h-[360px] overflow-hidden px-6 pt-8 sm:h-[620px] sm:px-[5.56vw] sm:pt-10">
+      <section className="scroll-reveal-section scroll-stack-section-05 relative h-[360px] overflow-hidden bg-[#080808] px-6 pt-8 sm:h-[620px] sm:px-[5.56vw] sm:pt-10">
         <SectionLabel>OD VIZE K REALITĚ</SectionLabel>
         <svg
           className="absolute left-[-86px] top-[116px] h-[300px] w-[1170px] sm:left-[-40px] sm:top-[120px] sm:h-[480px] sm:w-[1800px]"
@@ -274,7 +347,7 @@ const Portfolio = () => {
       </section>
 
       <section
-        className={`${contentPadding} bg-[#111] pb-20 pt-16 sm:pb-28 sm:pt-24`}
+        className={`scroll-reveal-section scroll-stack-section-06 ${contentPadding} bg-[#111] pb-20 pt-16 sm:pb-28 sm:pt-24`}
         id="kontakt"
       >
         <SectionLabel number="04">KONTAKT</SectionLabel>
@@ -364,7 +437,7 @@ const Portfolio = () => {
         </div>
       </section>
 
-      <footer className={`${contentPadding} pb-9 pt-16 sm:pt-[88px]`}>
+      <footer className={`scroll-reveal-section scroll-stack-section-07 ${contentPadding} bg-[#080808] pb-9 pt-16 sm:pt-[88px]`}>
         <SectionLabel>PŘIPRAVENÝ TVOŘIT NĚCO NOVÉHO</SectionLabel>
         <div className="my-10 flex items-center justify-between sm:my-14">
           <h2 className="m-0 text-[53px] tracking-[-.08em] sm:text-[9vw]">
@@ -395,7 +468,8 @@ const Portfolio = () => {
           <span>DESIGNED &amp; DEVELOPED BY ME</span>
         </div>
       </footer>
-    </main>
+      </main>
+    </>
   );
 };
 

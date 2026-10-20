@@ -1,13 +1,16 @@
+import type { CSSProperties } from "react";
+import Image from "next/image";
 import { projects } from "@/data/portfolio";
 import Arrow from "./Arrow";
 
 const ProjectList = () => (
-  <div className="flex flex-col gap-6">
+  <div className="project-stack flex flex-col gap-6">
     {projects.map((project, index) => (
       <a
-        className="overflow-hidden rounded-2xl border border-[#30302e] bg-[#191919]"
+        className="project-stack-card flex h-[calc(100svh-144px)] min-h-0 flex-col overflow-hidden rounded-2xl border border-[#30302e] bg-[#191919] sm:h-[calc(100svh-180px)]"
         href="#kontakt"
         key={project.name}
+        style={{ "--stack-index": index } as CSSProperties}
       >
         <div className="flex min-h-[106px] items-start gap-6 p-[18px] font-mono text-xs text-[#a5a5a2] sm:min-h-24 sm:items-center sm:px-7 sm:py-0">
           <span>{String(index + 1).padStart(2, "0")}</span>
@@ -21,10 +24,15 @@ const ProjectList = () => (
             <Arrow />
           </span>
         </div>
-        <div
-          className="relative h-[520px] bg-cover bg-top sm:h-[800px]"
-          style={{ backgroundImage: `url("${project.image}")` }}
-        />
+        <div className="project-image relative min-h-0 flex-1 bg-[#080808]">
+          <Image
+            className="object-cover"
+            src={project.image}
+            alt={`${project.name} – ukázka projektu`}
+            fill
+            sizes="(max-width: 640px) calc(100vw - 48px), 88vw"
+          />
+        </div>
       </a>
     ))}
   </div>

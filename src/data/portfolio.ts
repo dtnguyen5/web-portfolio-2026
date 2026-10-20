@@ -1,6 +1,7 @@
 export type Service = {
   title: string;
   skills: string[];
+  image: string;
 };
 
 export type Project = {
@@ -13,6 +14,7 @@ export type Project = {
 export const services: Service[] = [
   {
     title: "UI / UX DESIGN",
+    image: "/workspace-detail.png",
     skills: [
       "Wireframing",
       "Prototypování",
@@ -24,6 +26,7 @@ export const services: Service[] = [
   },
   {
     title: "WEB DEVELOPMENT",
+    image: "/project-code.png",
     skills: [
       "Next.js",
       "TypeScript",
@@ -35,6 +38,7 @@ export const services: Service[] = [
   },
   {
     title: "BRAND / GRAFIKA",
+    image: "/jakub.png",
     skills: [
       "Logo",
       "Vizuální styl",
@@ -69,13 +73,13 @@ export const projects: Project[] = [
 
 export const tools = [
   "Figma",
-  "Webflow",
-  "React",
-  "Next.js",
+  "Framer",
+  "Affinity",
   "Photoshop",
   "Illustrator",
-  "InDesign",
-  "Blender",
+  "React",
+  "Next.js",
+  "Git",
 ];
 
 export const experience = {
