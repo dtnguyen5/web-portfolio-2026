@@ -27,16 +27,16 @@ body {
 
 .project-stack-card {
   position: sticky;
-  top: 112px;
+  top: 7rem;
   z-index: calc(1 + var(--stack-index));
   display: flex;
   flex-direction: column;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 40rem) {
   .project-stack-card {
-    top: 140px;
-    height: calc(100svh - 180px);
+    top: 8.75rem;
+    height: calc(100svh - 11.25rem);
   }
 }
 
@@ -73,25 +73,25 @@ body {
   z-index: 7;
 }
 
-@media (min-width: 640px) {
+@media (min-width: 40rem) {
   .scroll-stack-section-01 {
     min-height: 100vh;
   }
 
   .about-sidebar {
     position: sticky;
-    top: 32px;
+    top: 2rem;
     align-self: start;
   }
 
   .about-sidebar-image {
-    height: min(680px, calc(100vh - 140px));
+    height: min(42.5rem, calc(100vh - 8.75rem));
   }
 }
 
 .about-reveal {
   opacity: 0;
-  transform: translateY(32px);
+  transform: translateY(2rem);
   transition:
     opacity 900ms cubic-bezier(0.22, 1, 0.36, 1),
     transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
@@ -122,7 +122,7 @@ body {
 
 @keyframes section-rise {
   from {
-    transform: translate3d(0, 72px, 0);
+    transform: translate3d(0, 4.5rem, 0);
   }
 
   to {
@@ -139,7 +139,7 @@ body {
 @keyframes hero-reveal {
   from {
     opacity: 0;
-    transform: translateY(32px);
+    transform: translateY(2rem);
   }
 
   to {

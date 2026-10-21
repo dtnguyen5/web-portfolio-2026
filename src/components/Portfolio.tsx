@@ -11,7 +11,7 @@ import SmoothCursor from "./SmoothCursor";
 
 const contentPadding = "px-6 sm:px-[5.56vw]";
 const buttonClass =
-  "inline-flex h-[52px] items-center gap-6 rounded-full bg-[#f1f0ec] px-6 text-base font-medium text-[#080808]";
+  "inline-flex h-13 items-center gap-6 rounded-full bg-[#f1f0ec] px-6 text-base font-medium text-[#080808]";
 
 const Portfolio = () => {
   const [sent, setSent] = useState(false);
@@ -86,10 +86,10 @@ const Portfolio = () => {
       <SmoothCursor />
       <main className="overflow-x-clip">
       <section
-        className={`scroll-stack-section scroll-stack-section-01 ${contentPadding} min-h-screen bg-[#080808] pb-0 pt-[54px] sm:pt-[88px]`}
+        className={`scroll-stack-section scroll-stack-section-01 ${contentPadding} min-h-screen bg-[#080808] pb-0 pt-14 sm:pt-22`}
         id="domu"
       >
-        <nav className="hero-reveal fixed inset-x-0 top-5 z-50 flex h-[44px] items-center justify-between bg-transparent px-6 sm:top-8 sm:h-[76px] sm:justify-center sm:px-[5.56vw]">
+        <nav className="hero-reveal fixed inset-x-0 top-5 z-50 flex h-11 items-center justify-between bg-transparent px-6 sm:top-8 sm:h-19 sm:justify-center sm:px-[5.56vw]">
           <a className="sm:hidden" href="#domu" aria-label="Domů">
             <Image
               src="/Osobní značka.svg"
@@ -98,7 +98,7 @@ const Portfolio = () => {
               height={34}
             />
           </a>
-          <div className="hidden items-center gap-6 rounded-full border border-[#1f1f1f] bg-[#080808] px-3 py-2.5 text-base font-medium text-[#f1f0ec] sm:flex sm:w-[470px] sm:justify-center">
+          <div className="hidden items-center gap-6 rounded-full border border-[#1f1f1f] bg-[#080808] px-3 py-2.5 text-base font-medium text-[#f1f0ec] sm:flex sm:w-118 sm:justify-center">
             <a href="#domu" aria-label="Domů">
               <Image
                 src="/Osobní značka.svg"
@@ -132,7 +132,7 @@ const Portfolio = () => {
             aria-label="Otevřít menu"
             aria-expanded={menuOpen}
           >
-            <span className="flex w-[22px] flex-col gap-1.5" aria-hidden="true">
+            <span className="flex w-5.5 flex-col gap-1.5" aria-hidden="true">
               <span className="h-px w-full bg-[#f5f2e9]" />
               <span className="h-px w-full bg-[#f5f2e9]" />
             </span>
@@ -157,16 +157,16 @@ const Portfolio = () => {
             ))}
           </div>
         )}
-        <div className="hero-reveal hero-meta flex flex-col gap-7 pb-0 pt-7 font-mono text-xs leading-6 text-[#a5a5a2] sm:flex-row sm:items-center sm:justify-between sm:pb-[30px] sm:pt-16">
+        <div className="hero-reveal hero-meta flex flex-col gap-7 pb-0 pt-7 font-mono text-xs leading-6 text-[#a5a5a2] sm:flex-row sm:items-center sm:justify-between sm:pb-7 sm:pt-16">
           <span>WEB DESIGN / DEVELOPMENT / GRAFIKA</span>
         </div>
         <div className="pb-8 pt-10 font-medium tracking-[-.06em] sm:pb-14 sm:pt-0">
-          <h1 className="m-0 text-[clamp(45px,8.25vw,119px)] leading-[1.08]">
+          <h1 className="m-0 text-[clamp(2.8125rem,8.25vw,7.4375rem)] leading-[1.08]">
             <span className="hero-title-line hero-title-line-primary" aria-label="AHOJ, JSEM HONZA">
               <span>AHOJ, JSEM HONZA</span>
             </span>
           </h1>
-          <p className="m-0 text-[clamp(45px,7.64vw,110px)] leading-[1.13] text-[#a5a5a2]">
+          <p className="m-0 text-[clamp(2.8125rem,7.64vw,6.875rem)] leading-[1.13] text-[#a5a5a2]">
             <span className="hero-title-line hero-title-line-secondary" aria-label="DESIGNÉR">
               <span>DESIGNÉR</span>
             </span>
@@ -196,9 +196,9 @@ const Portfolio = () => {
         id="o-mne"
       >
         <SectionLabel>O MNĚ</SectionLabel>
-        <div className="mt-10 grid gap-10 sm:mt-12 sm:grid-cols-[520px_1fr] sm:gap-[6.67vw]">
+        <div className="mt-10 grid gap-10 sm:mt-12 sm:grid-cols-[32.5rem_1fr] sm:gap-[6.67vw]">
           <div className="about-sidebar">
-            <div className="about-sidebar-image relative h-[440px] overflow-hidden rounded-2xl sm:h-[680px]">
+            <div className="about-sidebar-image relative h-110 overflow-hidden rounded-2xl sm:h-170">
               <Image
                 className="object-cover"
                 src="/workspace.png"
@@ -209,7 +209,7 @@ const Portfolio = () => {
             </div>
             <div className="mt-6 flex justify-between">
               <div className="flex flex-col gap-2">
-                <strong className="text-[22px]">Nguyen Duy Tiep (Honza)</strong>
+                <strong className="text-2xl">Nguyen Duy Tiep (Honza)</strong>
                 <span className="font-mono text-xs text-[#a5a5a2]">
                   PLZEŇ, CZ
                 </span>
@@ -219,10 +219,10 @@ const Portfolio = () => {
           <div className="about-content">
             <article className="about-reveal border-t border-[#30302e] py-6 sm:pb-16 sm:pt-8 sm:pr-12">
               <SectionLabel>01 / 03</SectionLabel>
-              <h2 className="my-5 text-[38px] leading-tight tracking-[-.05em] sm:text-[52px]">
+              <h2 className="my-5 text-4xl leading-tight tracking-[-.05em] sm:text-[3.25rem]">
                 Kdo jsem
               </h2>
-              <p className="m-0 max-w-[970px] text-lg leading-[1.55] text-[#a5a5a2]">
+              <p className="m-0 max-w-[60.625rem] text-lg leading-[1.55] text-[#a5a5a2]">
                 Jmenuji se Nguyen Duy Tiep (Honza) a jsem webový designér a
                 developer z Plzně. Pomáhám klientům převádět jejich nápady do
                 funkčních a moderních webových řešení. Zakládám si na detailu,
@@ -233,7 +233,7 @@ const Portfolio = () => {
             </article>
             <article className="about-reveal border-t border-[#30302e] py-6 !pb-0 sm:pt-10">
               <SectionLabel>02 / 03</SectionLabel>
-              <h2 className="my-5 text-[38px] leading-tight tracking-[-.05em] sm:text-[52px]">
+              <h2 className="my-5 text-4xl leading-tight tracking-[-.05em] sm:text-[3.25rem]">
                 Škola &amp; praxe
               </h2>
               <div className="mt-8">
@@ -256,10 +256,10 @@ const Portfolio = () => {
                   key={job.title}
                 >
                   <SectionLabel>{job.label}</SectionLabel>
-                  <h3 className="mt-4 text-3xl leading-tight sm:text-[34px]">
+                  <h3 className="mt-4 text-3xl leading-tight sm:text-4xl">
                     {job.title}
                   </h3>
-                  <p className="m-0 mt-3 text-xl text-[#a5a5a2] sm:text-[28px]">
+                  <p className="m-0 mt-3 text-xl text-[#a5a5a2] sm:text-3xl">
                     {job.description}
                   </p>
                 </div>
@@ -269,7 +269,7 @@ const Portfolio = () => {
             <article className="pt-0">
               <div className="mb-7 h-px bg-[#30302e]" />
               <SectionLabel>03 / 03</SectionLabel>
-              <h2 className="my-5 text-[38px] leading-tight tracking-[-.05em] sm:text-[52px]">
+              <h2 className="my-5 text-4xl leading-tight tracking-[-.05em] sm:text-[3.25rem]">
                 Nástroje
               </h2>
               <div className="flex flex-wrap gap-2.5">
@@ -292,9 +292,9 @@ const Portfolio = () => {
         className={`scroll-reveal-section scroll-stack-section-03 ${contentPadding} bg-[#080808] pb-20 pt-20 sm:pb-28 sm:pt-28`}
         id="sluzby"
       >
-        <div className="max-w-[650px]">
+        <div className="max-w-162.5">
           <SectionLabel>CO UMÍM</SectionLabel>
-          <h2 className="mb-8 mt-9 text-[43px] leading-tight tracking-[-.06em] sm:mb-14 sm:mt-11 sm:text-[88px]">
+          <h2 className="mb-8 mt-9 text-[2.6875rem] leading-tight tracking-[-.06em] sm:mb-14 sm:mt-11 sm:text-[5.5rem]">
             Moje služby
           </h2>
         </div>
@@ -306,16 +306,16 @@ const Portfolio = () => {
         id="projekty"
       >
         <SectionLabel number="03">PROJEKTY</SectionLabel>
-        <h2 className="mb-8 mt-9 text-[43px] leading-tight tracking-[-.06em] sm:mb-14 sm:mt-11 sm:text-[88px]">
+        <h2 className="mb-8 mt-9 text-[2.6875rem] leading-tight tracking-[-.06em] sm:mb-14 sm:mt-11 sm:text-[5.5rem]">
           Zpracované projekty
         </h2>
         <ProjectList />
       </section>
 
-      <section className="scroll-reveal-section scroll-stack-section-05 relative h-[360px] overflow-hidden bg-[#080808] px-6 pt-8 sm:h-[620px] sm:px-[5.56vw] sm:pt-10">
+      <section className="scroll-reveal-section scroll-stack-section-05 relative h-90 overflow-hidden bg-[#080808] px-6 pt-8 sm:h-[38.75rem] sm:px-[5.56vw] sm:pt-10">
         <SectionLabel>OD VIZE K REALITĚ</SectionLabel>
         <svg
-          className="absolute left-[-86px] top-[116px] h-[300px] w-[1170px] sm:left-[-40px] sm:top-[120px] sm:h-[480px] sm:w-[1800px]"
+          className="absolute left-[-5.375rem] top-[7.25rem] h-75 w-[73.125rem] sm:left-[-2.5rem] sm:top-[7.5rem] sm:h-120 sm:w-[112.5rem]"
           viewBox="0 0 1800 480"
           aria-label="Měním vaše vize v realitu"
           role="img"
@@ -341,7 +341,7 @@ const Portfolio = () => {
             </textPath>
           </text>
         </svg>
-        <span className="absolute bottom-11 left-[46%] text-3xl sm:bottom-20 sm:text-[40px]">
+        <span className="absolute bottom-11 left-[46%] text-3xl sm:bottom-20 sm:text-5xl">
           ✦
         </span>
       </section>
@@ -351,16 +351,16 @@ const Portfolio = () => {
         id="kontakt"
       >
         <SectionLabel number="04">KONTAKT</SectionLabel>
-        <div className="mt-8 flex flex-col gap-8 sm:mt-12 sm:grid sm:grid-cols-[480px_1fr] sm:gap-20">
+        <div className="mt-8 flex flex-col gap-8 sm:mt-12 sm:grid sm:grid-cols-[30rem_1fr] sm:gap-20">
           <div>
-            <h2 className="mb-4 text-[45px] tracking-[-.06em] sm:hidden">
+            <h2 className="mb-4 text-[2.8125rem] tracking-[-.06em] sm:hidden">
               Napište mi
             </h2>
             <p className="mb-8 leading-6 text-[#a5a5a2] sm:hidden">
               Máte nápad, projekt nebo jen otázku? Ozvěte se mi a společně
               vymyslíme další krok.
             </p>
-            <div className="relative h-[340px] overflow-hidden rounded-2xl sm:h-[720px]">
+            <div className="relative h-[21.25rem] overflow-hidden rounded-2xl sm:h-180">
               <Image
                 className="object-cover"
                 src="/workspace-detail.png"
@@ -375,10 +375,10 @@ const Portfolio = () => {
           </div>
           <form className="flex flex-col" onSubmit={submitForm}>
             <div className="hidden sm:block">
-              <h2 className="m-0 text-[64px] leading-[1.1] tracking-[-.06em]">
+              <h2 className="m-0 text-[4rem] leading-[1.1] tracking-[-.06em]">
                 Napište mi
               </h2>
-              <p className="mb-7 mt-7 max-w-[650px] text-[18px] leading-[1.5] text-[#a5a5a2]">
+              <p className="mb-7 mt-7 max-w-162.5 text-lg leading-[1.5] text-[#a5a5a2]">
                 Máte projekt, který potřebuje oživit? Napište mi tu zprávu a
                 domluvíme se na detailech
               </p>
@@ -394,7 +394,7 @@ const Portfolio = () => {
                 >
                   {label}
                   <input
-                    className="h-[58px] rounded-lg border border-[#30302e] bg-[#191919] px-5 text-base font-normal outline-none placeholder:text-[#727270]"
+                    className="h-[3.625rem] rounded-lg border border-[#30302e] bg-[#191919] px-5 text-base font-normal outline-none placeholder:text-[#727270]"
                     required
                     name={label.toLowerCase()}
                     type={type}
@@ -406,7 +406,7 @@ const Portfolio = () => {
             <label className="mt-6 flex flex-col gap-3 text-sm font-medium">
               Předmět
               <select
-                className="h-[58px] rounded-lg border border-[#30302e] bg-[#191919] px-5 text-base font-normal text-[#a5a5a2] outline-none"
+                className="h-[3.625rem] rounded-lg border border-[#30302e] bg-[#191919] px-5 text-base font-normal text-[#a5a5a2] outline-none"
                 defaultValue=""
               >
                 <option value="" disabled>
@@ -437,22 +437,22 @@ const Portfolio = () => {
         </div>
       </section>
 
-      <footer className={`scroll-reveal-section scroll-stack-section-07 ${contentPadding} bg-[#080808] pb-9 pt-16 sm:pt-[88px]`}>
+      <footer className={`scroll-reveal-section scroll-stack-section-07 ${contentPadding} bg-[#080808] pb-9 pt-16 sm:pt-22`}>
         <SectionLabel>PŘIPRAVENÝ TVOŘIT NĚCO NOVÉHO</SectionLabel>
         <div className="my-10 flex items-center justify-between sm:my-14">
-          <h2 className="m-0 text-[53px] tracking-[-.08em] sm:text-[9vw]">
+          <h2 className="m-0 text-[3.3125rem] tracking-[-.08em] sm:text-[9vw]">
             POJĎME TVOŘIT
           </h2>
         </div>
         <div className="h-px bg-[#30302e]" />
-        <div className="flex flex-col gap-3 py-7 text-xl sm:flex-row sm:justify-between sm:py-10 sm:text-[44px]">
+        <div className="flex flex-col gap-3 py-7 text-xl sm:flex-row sm:justify-between sm:py-10 sm:text-[2.75rem]">
           <a href={`mailto:${contact.email}`}>{contact.email}</a>
           <a href={`tel:${contact.phone.replace(/\s/g, "")}`}>
             {contact.phone}
           </a>
         </div>
         <div className="h-px bg-[#30302e]" />
-        <div className="grid gap-5 pt-6 font-mono text-[10px] text-[#a5a5a2] sm:flex sm:items-center sm:justify-between">
+        <div className="grid gap-5 pt-6 font-mono text-[0.625rem] text-[#a5a5a2] sm:flex sm:items-center sm:justify-between">
           <span>©2026 HONZA</span>
           <div className="order-3 flex justify-between gap-2 text-[#f1f0ec] sm:order-none sm:gap-7">
             <a className="flex items-center gap-1.5" href="#">

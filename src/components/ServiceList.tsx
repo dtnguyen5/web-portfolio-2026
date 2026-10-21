@@ -24,7 +24,7 @@ const ServiceList = () => {
 
         return (
           <article
-            className={`service-row group relative min-h-[241px] border-t border-[#30302e] py-7 sm:grid sm:min-h-[182px] sm:grid-cols-[56px_1fr_560px] sm:gap-6 sm:py-10 ${
+            className={`service-row group relative min-h-60 border-t border-[#30302e] py-7 sm:grid sm:min-h-44 sm:grid-cols-[3.5rem_1fr_35rem] sm:gap-6 sm:py-10 ${
               isActive ? "is-active" : ""
             }`}
             key={service.title}
@@ -48,7 +48,7 @@ const ServiceList = () => {
               {String(index + 1).padStart(2, "0")}
             </div>
             <h3
-              className={`mt-11 text-[25px] tracking-[-.04em] transition-colors duration-300 sm:mt-0 sm:text-[34px] ${
+              className={`mt-11 text-2xl tracking-[-.04em] transition-colors duration-300 sm:mt-0 sm:text-4xl ${
                 isActive ? "text-[#f1f0ec]" : "text-[#a5a5a2]"
               }`}
             >
@@ -82,7 +82,7 @@ const ServiceList = () => {
         );
       })}
       <div
-        className={`service-preview pointer-events-none fixed left-0 top-0 z-[90] hidden aspect-[1.45] w-[220px] -translate-y-1/2 rotate-[-4deg] overflow-hidden rounded-xl border border-[#f1f0ec]/20 bg-[#191919] shadow-2xl transition-[opacity,transform] duration-300 ease-out md:block ${
+        className={`service-preview pointer-events-none fixed left-0 top-0 z-50 hidden aspect-[1.45] w-55 -translate-y-1/2 -rotate-1 overflow-hidden rounded-xl border border-[#f1f0ec]/20 bg-[#191919] shadow-2xl transition-[opacity,transform] duration-300 ease-out md:block ${
           activeService === null ? "opacity-0" : "opacity-100 rotate-[3deg]"
         }`}
         ref={previewRef}
