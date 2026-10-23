@@ -706,7 +706,7 @@ const Portfolio = () => {
           ref={projectsHeadingRef}
         >
           <div className="projects-heading-label">
-            <SectionLabel number="03">PROJEKTY</SectionLabel>
+            <SectionLabel>PROJEKTY</SectionLabel>
           </div>
           <h2 className="projects-heading-title m-0 mt-9 whitespace-nowrap text-[clamp(2rem,9vw,2.6875rem)] leading-tight tracking-[-.06em] sm:mt-11 sm:text-[5.5rem]">
             Zpracované projekty
@@ -780,7 +780,7 @@ const Portfolio = () => {
         className={`scroll-reveal-section scroll-stack-section-06 ${contentPadding} bg-[#111] pb-20 pt-16 sm:pb-28 sm:pt-24`}
         id="kontakt"
       >
-        <SectionLabel number="04">KONTAKT</SectionLabel>
+        <SectionLabel>KONTAKT</SectionLabel>
         <div className="mt-8 flex flex-col gap-8 sm:mt-12 lg:grid lg:grid-cols-[minmax(0,30rem)_1fr] lg:gap-20">
           <div>
             <h2 className="mb-4 text-[2.8125rem] tracking-[-.06em] sm:text-[4rem] lg:hidden">
