@@ -74,6 +74,7 @@ const ServiceList = () => {
                   src={service.image}
                   alt={`Ukázka oboru ${service.title}`}
                   fill
+                  quality={90}
                   sizes="100vw"
                 />
               </div>
@@ -93,7 +94,10 @@ const ServiceList = () => {
             src={services[activeService].image}
             alt={`Ukázka oboru ${services[activeService].title}`}
             fill
-            sizes="220px"
+            quality={90}
+            // Rendered at twice its size so it stays sharp on retina screens
+            // and while the card is tilted.
+            sizes="440px"
           />
         )}
       </div>

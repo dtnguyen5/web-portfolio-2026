@@ -593,13 +593,13 @@ const Portfolio = () => {
         <SectionLabel>O MNĚ</SectionLabel>
         <div className="mt-10 grid gap-10 sm:mt-12 lg:grid-cols-[minmax(0,32.5rem)_1fr] lg:gap-[6.67vw]">
           <div className="about-sidebar">
-            <div className="about-sidebar-image relative h-110 overflow-hidden rounded-2xl sm:h-136 lg:h-170">
+            <div className="about-sidebar-image relative h-110 overflow-hidden rounded-2xl bg-[#e7e7e7] sm:h-136 lg:h-170">
               <Image
-                className="object-cover"
-                src="/workspace.png"
-                alt="Pracovní prostor designéra"
+                className="object-cover object-[50%_25%]"
+                src="/portrait.jpg"
+                alt="Nguyen Duy Tiep (Honza)"
                 fill
-                sizes="(max-width: 700px) 342px, 520px"
+                sizes="(max-width: 1024px) 100vw, 520px"
               />
             </div>
             <div className="mt-6 flex justify-between">

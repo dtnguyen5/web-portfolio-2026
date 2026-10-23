@@ -14,7 +14,7 @@ export type Project = {
 export const services: Service[] = [
   {
     title: "UI / UX DESIGN",
-    image: "/workspace-detail.png",
+    image: "/service-uiux.jpg",
     skills: [
       "Wireframing",
       "Prototypování",
@@ -26,7 +26,7 @@ export const services: Service[] = [
   },
   {
     title: "WEB DEVELOPMENT",
-    image: "/project-code.png",
+    image: "/service-webdev.jpg",
     skills: [
       "Next.js",
       "TypeScript",
@@ -38,7 +38,7 @@ export const services: Service[] = [
   },
   {
     title: "BRAND / GRAFIKA",
-    image: "/jakub.png",
+    image: "/service-brand.jpg",
     skills: [
       "Logo",
       "Vizuální styl",
