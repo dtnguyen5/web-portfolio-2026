@@ -1,13 +1,14 @@
 "use client";
 
 import Image from "next/image";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { contact, experience, tools } from "@/data/portfolio";
 import Arrow from "./Arrow";
 import ProjectList from "./ProjectList";
 import SectionLabel from "./SectionLabel";
 import ServiceList from "./ServiceList";
 import SmoothCursor from "./SmoothCursor";
+import SmoothScroll from "./SmoothScroll";
 
 const contentPadding = "px-6 sm:px-[5.56vw]";
 const buttonClass =
@@ -16,6 +17,15 @@ const buttonClass =
 const Portfolio = () => {
   const [sent, setSent] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const heroTitleRef = useRef<HTMLDivElement>(null);
+  const heroInfoRef = useRef<HTMLDivElement>(null);
+  const projectsSectionRef = useRef<HTMLElement>(null);
+  const projectsHeadingRef = useRef<HTMLDivElement>(null);
+  const statementSectionRef = useRef<HTMLElement>(null);
+  const statementSvgRef = useRef<SVGSVGElement>(null);
+  const statementTextPathRef = useRef<SVGTextPathElement>(null);
+  const statementMeasureRef = useRef<SVGTextElement>(null);
+  const statementStarRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
     const revealItems = document.querySelectorAll<HTMLElement>(".about-reveal");
@@ -76,6 +86,190 @@ const Portfolio = () => {
     };
   }, []);
 
+  useEffect(() => {
+    const title = heroTitleRef.current;
+    const info = heroInfoRef.current;
+
+    if (!title || !info) {
+      return;
+    }
+
+    let frame = 0;
+    const main = title.closest("main");
+
+    // Extra hero space keeps the title pinned while the next section slides over it.
+    const resizeObserver = new ResizeObserver(() => {
+      main?.style.setProperty("--hero-cover-space", `${title.offsetHeight}px`);
+    });
+    resizeObserver.observe(title);
+
+    const updateCoverProgress = () => {
+      frame = 0;
+      const titleRect = title.getBoundingClientRect();
+      const infoTop = info.getBoundingClientRect().top;
+      const progress = Math.min(
+        Math.max((titleRect.bottom - infoTop) / titleRect.height, 0),
+        1,
+      );
+      title.style.setProperty("--hero-cover-progress", progress.toFixed(3));
+    };
+
+    const requestUpdate = () => {
+      if (!frame) {
+        frame = requestAnimationFrame(updateCoverProgress);
+      }
+    };
+
+    updateCoverProgress();
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", requestUpdate);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      resizeObserver.disconnect();
+      window.removeEventListener("scroll", requestUpdate);
+      window.removeEventListener("resize", requestUpdate);
+    };
+  }, []);
+
+  useEffect(() => {
+    const section = projectsSectionRef.current;
+    const heading = projectsHeadingRef.current;
+    const title = heading?.querySelector<HTMLElement>(".projects-heading-title");
+
+    if (!section || !heading || !title) {
+      return;
+    }
+
+    let frame = 0;
+    let collapse = 0;
+
+    // The sticky heading shrinks into a compact bar, so the project cards can
+    // stick right under it and stay tall. On wide screens the bar sits in the
+    // same row as the nav, elsewhere right below it.
+    const measure = () => {
+      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
+      const isDesktop = window.matchMedia("(min-width: 40rem)").matches;
+      const isWide = window.matchMedia("(min-width: 80rem)").matches;
+      const titleFontSize = parseFloat(getComputedStyle(title).fontSize);
+      const scale = Math.min(1, ((isDesktop ? 2 : 1.75) * rem) / titleFontSize);
+      const targetTop = (isWide ? 3.125 : isDesktop ? 7.25 : 4.75) * rem;
+      const compactHeight = Math.max(
+        targetTop + title.offsetHeight * scale + rem,
+        isWide ? 7.5 * rem : 0,
+      );
+
+      collapse = Math.max(0, heading.offsetHeight - compactHeight);
+      section.style.setProperty("--projects-heading-height", `${compactHeight}px`);
+      section.style.setProperty("--projects-heading-collapse", `${collapse}px`);
+      heading.style.setProperty("--title-shift", `${title.offsetTop - targetTop}px`);
+      heading.style.setProperty("--title-scale", scale.toFixed(3));
+      update();
+    };
+
+    const update = () => {
+      frame = 0;
+      const scrolled = Math.max(0, -section.getBoundingClientRect().top);
+      const progress = collapse ? Math.min(scrolled / collapse, 1) : 0;
+      heading.style.setProperty("--compact-progress", progress.toFixed(3));
+    };
+
+    const requestUpdate = () => {
+      if (!frame) {
+        frame = requestAnimationFrame(update);
+      }
+    };
+
+    const resizeObserver = new ResizeObserver(measure);
+    resizeObserver.observe(heading);
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+
+    return () => {
+      cancelAnimationFrame(frame);
+      resizeObserver.disconnect();
+      window.removeEventListener("scroll", requestUpdate);
+    };
+  }, []);
+
+  useEffect(() => {
+    const section = statementSectionRef.current;
+    const svg = statementSvgRef.current;
+    const textPath = statementTextPathRef.current;
+    const measureText = statementMeasureRef.current;
+    const star = statementStarRef.current;
+    const arc = svg?.querySelector<SVGPathElement>("#statement-arc");
+
+    if (
+      !section ||
+      !svg ||
+      !textPath ||
+      !measureText ||
+      !star ||
+      !arc ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+
+    let frame = 0;
+    let startOffset = 0;
+    let endOffset = 0;
+
+    // The text slides along the arc from behind the right edge of the screen
+    // until it has fully left the screen on the left.
+    const measure = () => {
+      const viewBoxWidth = 1800;
+      const arcStartX = -40;
+      const arcWidth = 1840;
+      const svgRect = svg.getBoundingClientRect();
+      const unitsPerPx = viewBoxWidth / svgRect.width;
+      const arcLength = arc.getTotalLength();
+      const lengthAtScreenX = (screenX: number) => {
+        const x = (screenX - svgRect.left) * unitsPerPx;
+        return Math.min(
+          arcLength,
+          Math.max(0, ((x - arcStartX) / arcWidth) * arcLength),
+        );
+      };
+      const textLength = measureText.getComputedTextLength();
+
+      startOffset = lengthAtScreenX(document.documentElement.clientWidth) + 20;
+      endOffset = lengthAtScreenX(0) - textLength - 20;
+      update();
+    };
+
+    const update = () => {
+      frame = 0;
+      // Runs only while the section is pinned, so the text starts off-screen.
+      const rect = section.getBoundingClientRect();
+      const pinnedDistance = rect.height - window.innerHeight;
+      const progress = Math.min(
+        Math.max(-rect.top / pinnedDistance, 0) / 0.9,
+        1,
+      );
+      const offset = startOffset + (endOffset - startOffset) * progress;
+      textPath.setAttribute("startOffset", offset.toFixed(1));
+      star.style.transform = `rotate(${(progress * 720).toFixed(1)}deg)`;
+    };
+
+    const requestUpdate = () => {
+      if (!frame) {
+        frame = requestAnimationFrame(update);
+      }
+    };
+
+    measure();
+    document.fonts.ready.then(measure);
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+    window.addEventListener("resize", measure);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", requestUpdate);
+      window.removeEventListener("resize", measure);
+    };
+  }, []);
+
   const submitForm = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSent(true);
@@ -84,11 +278,8 @@ const Portfolio = () => {
   return (
     <>
       <SmoothCursor />
+      <SmoothScroll />
       <main className="overflow-x-clip">
-      <section
-        className={`scroll-stack-section scroll-stack-section-01 ${contentPadding} min-h-screen bg-[#080808] pb-0 pt-14 sm:pt-22`}
-        id="domu"
-      >
         <nav className="hero-reveal fixed inset-x-0 top-5 z-50 flex h-11 items-center justify-between bg-transparent px-6 sm:top-8 sm:h-19 sm:justify-center sm:px-[5.56vw]">
           <a className="sm:hidden" href="#domu" aria-label="Domů">
             <Image
@@ -138,6 +329,10 @@ const Portfolio = () => {
             </span>
           </button>
         </nav>
+      <section
+        className={`scroll-stack-section scroll-stack-section-01 ${contentPadding} bg-[#080808] pb-0 pt-14 sm:pt-22`}
+        id="domu"
+      >
         {menuOpen && (
           <div className="mt-5 flex flex-col gap-4 rounded-lg border border-[#30302e] p-4 text-sm text-[#a5a5a2] sm:hidden">
             {[
@@ -157,6 +352,7 @@ const Portfolio = () => {
             ))}
           </div>
         )}
+        <div className="hero-title-sticky" ref={heroTitleRef}>
         <div className="hero-reveal hero-meta flex flex-col gap-7 pb-0 pt-7 font-mono text-xs leading-6 text-[#a5a5a2] sm:flex-row sm:items-center sm:justify-between sm:pb-7 sm:pt-16">
           <span>WEB DESIGN / DEVELOPMENT / GRAFIKA</span>
         </div>
@@ -178,6 +374,8 @@ const Portfolio = () => {
             </span>
           </p>
         </div>
+        </div>
+        <div className="hero-info-cover bg-[#080808]" ref={heroInfoRef}>
         <div className="hero-line-reveal h-px bg-[#30302e]" aria-hidden="true" />
         <div className="flex flex-col gap-6 py-7 text-lg leading-6 sm:flex-row sm:justify-between sm:py-8 sm:text-xl sm:leading-7">
           <p className="hero-reveal hero-info-left m-0">
@@ -189,10 +387,12 @@ const Portfolio = () => {
             Designér a web developer tvořící čistá rozhraní a moderní weby.
           </p>
         </div>
+        </div>
+        <div className="hero-cover-spacer" aria-hidden="true" />
       </section>
 
       <section
-        className={`scroll-reveal-section scroll-stack-section-02 ${contentPadding} bg-[#111] pb-20 pt-16 sm:pb-28`}
+        className={`scroll-stack-section scroll-stack-section-02 ${contentPadding} bg-[#111] pb-20 pt-16 sm:pb-28`}
         id="o-mne"
       >
         <SectionLabel>O MNĚ</SectionLabel>
@@ -302,48 +502,83 @@ const Portfolio = () => {
       </section>
 
       <section
-        className={`scroll-reveal-section scroll-stack-section-04 ${contentPadding} bg-[#111] pb-20 pt-16 sm:pb-28 sm:pt-24`}
+        className={`scroll-reveal-section scroll-stack-section-04 ${contentPadding} bg-[#111] pb-20 sm:pb-28`}
         id="projekty"
+        ref={projectsSectionRef}
       >
-        <SectionLabel number="03">PROJEKTY</SectionLabel>
-        <h2 className="mb-8 mt-9 text-[2.6875rem] leading-tight tracking-[-.06em] sm:mb-14 sm:mt-11 sm:text-[5.5rem]">
-          Zpracované projekty
-        </h2>
+        <div
+          className="projects-heading bg-[#111] pb-8 pt-16 sm:pb-10 sm:pt-24"
+          ref={projectsHeadingRef}
+        >
+          <div className="projects-heading-label">
+            <SectionLabel number="03">PROJEKTY</SectionLabel>
+          </div>
+          <h2 className="projects-heading-title m-0 mt-9 text-[2.6875rem] leading-tight tracking-[-.06em] sm:mt-11 sm:text-[5.5rem]">
+            Zpracované projekty
+          </h2>
+        </div>
         <ProjectList />
       </section>
 
-      <section className="scroll-reveal-section scroll-stack-section-05 relative h-90 overflow-hidden bg-[#080808] px-6 pt-8 sm:h-[38.75rem] sm:px-[5.56vw] sm:pt-10">
-        <SectionLabel>OD VIZE K REALITĚ</SectionLabel>
-        <svg
-          className="absolute left-[-5.375rem] top-[7.25rem] h-75 w-[73.125rem] sm:left-[-2.5rem] sm:top-[7.5rem] sm:h-120 sm:w-[112.5rem]"
-          viewBox="0 0 1800 480"
-          aria-label="Měním vaše vize v realitu"
-          role="img"
-        >
-          <defs>
-            <path id="statement-arc" d="M -40 420 Q 720 -20 1800 420" />
-          </defs>
-          <use
-            href="#statement-arc"
-            fill="none"
-            stroke="#30302e"
-            strokeWidth="1"
-          />
-          <text
-            fill="#f1f0ec"
-            fontFamily="var(--font-inter), Arial, sans-serif"
-            fontSize="190"
-            fontWeight="500"
-            letterSpacing="-8"
-          >
-            <textPath href="#statement-arc" startOffset="1%">
-              MĚNÍM VAŠE VIZE V REALITU
-            </textPath>
-          </text>
-        </svg>
-        <span className="absolute bottom-11 left-[46%] text-3xl sm:bottom-20 sm:text-5xl">
-          ✦
-        </span>
+      <section
+        className="statement-scroll scroll-stack-section-05 relative bg-[#080808]"
+        ref={statementSectionRef}
+      >
+        <div className="sticky top-0 flex h-svh items-center overflow-hidden">
+          <div className="relative h-90 w-full px-6 pt-8 sm:h-[38.75rem] sm:px-[5.56vw] sm:pt-10">
+            <SectionLabel>OD VIZE K REALITĚ</SectionLabel>
+            <svg
+              className="absolute left-[-5.375rem] top-[7.25rem] h-75 w-[73.125rem] sm:left-[-2.5rem] sm:top-[7.5rem] sm:h-120 sm:w-[112.5rem]"
+              viewBox="0 0 1800 480"
+              aria-label="Měním vaše vize v realitu"
+              role="img"
+              ref={statementSvgRef}
+            >
+              <defs>
+                <path id="statement-arc" d="M -40 420 Q 720 -20 1800 420" />
+              </defs>
+              <use
+                href="#statement-arc"
+                fill="none"
+                stroke="#30302e"
+                strokeWidth="1"
+              />
+              <text
+                fill="#f1f0ec"
+                fontFamily="var(--font-inter), Arial, sans-serif"
+                fontSize="190"
+                fontWeight="500"
+                letterSpacing="-8"
+              >
+                <textPath
+                  href="#statement-arc"
+                  startOffset="1%"
+                  ref={statementTextPathRef}
+                >
+                  MĚNÍM VAŠE VIZE V REALITU
+                </textPath>
+              </text>
+              {/* Straight copy of the text, used only to measure its length. */}
+              <text
+                aria-hidden="true"
+                fontFamily="var(--font-inter), Arial, sans-serif"
+                fontSize="190"
+                fontWeight="500"
+                letterSpacing="-8"
+                ref={statementMeasureRef}
+                visibility="hidden"
+              >
+                MĚNÍM VAŠE VIZE V REALITU
+              </text>
+            </svg>
+            <span
+              className="absolute bottom-11 left-[46%] inline-block text-3xl sm:bottom-20 sm:text-5xl"
+              ref={statementStarRef}
+            >
+              ✦
+            </span>
+          </div>
+        </div>
       </section>
 
       <section

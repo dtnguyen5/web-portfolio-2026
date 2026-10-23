@@ -7,7 +7,7 @@ const ProjectList = () => (
   <div className="project-stack flex flex-col gap-6">
     {projects.map((project, index) => (
       <a
-        className="project-stack-card flex h-[calc(100svh-9rem)] min-h-0 flex-col overflow-hidden rounded-2xl border border-[#30302e] bg-[#191919] sm:h-[calc(100svh-11.25rem)]"
+        className="project-stack-card flex min-h-0 flex-col overflow-hidden rounded-2xl border border-[#30302e] bg-[#191919]"
         href="#kontakt"
         key={project.name}
         style={{ "--stack-index": index } as CSSProperties}

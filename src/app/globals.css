@@ -13,6 +13,11 @@ html {
   scroll-behavior: smooth;
 }
 
+/* Lenis animates the scroll itself (anchor links included). */
+html.lenis {
+  scroll-behavior: auto;
+}
+
 body {
   margin: 0;
 }
@@ -25,18 +30,50 @@ body {
   min-width: 0;
 }
 
+.projects-heading {
+  --compact-progress: 0;
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  /* Layout keeps the full height; the visible part shrinks with the title. */
+  margin-bottom: calc(-1 * var(--projects-heading-collapse, 0px));
+  clip-path: inset(
+    0 0 calc(var(--projects-heading-collapse, 0px) * var(--compact-progress)) 0
+  );
+}
+
+.projects-heading-label {
+  opacity: calc(1 - var(--compact-progress) * 1.5);
+}
+
+.projects-heading-title {
+  transform-origin: 0 0;
+  transform: translateY(calc(var(--title-shift, 0px) * var(--compact-progress) * -1))
+    scale(calc(1 - (1 - var(--title-scale, 1)) * var(--compact-progress)));
+}
+
+.project-stack {
+  padding-top: var(--projects-heading-collapse, 0px);
+}
+
 .project-stack-card {
   position: sticky;
-  top: 7rem;
+  top: var(--projects-heading-height, 9rem);
   z-index: calc(1 + var(--stack-index));
   display: flex;
   flex-direction: column;
+  height: calc(100svh - var(--projects-heading-height, 9rem) - 1rem);
+  min-height: 18rem;
+}
+
+/* Extra scroll length while the curved statement text slides along the arc. */
+.statement-scroll {
+  height: 280svh;
 }
 
 @media (min-width: 40rem) {
-  .project-stack-card {
-    top: 8.75rem;
-    height: calc(100svh - 11.25rem);
+  .statement-scroll {
+    height: 340svh;
   }
 }
 
@@ -74,10 +111,6 @@ body {
 }
 
 @media (min-width: 40rem) {
-  .scroll-stack-section-01 {
-    min-height: 100vh;
-  }
-
   .about-sidebar {
     position: sticky;
     top: 2rem;
@@ -197,6 +230,46 @@ body {
   animation-delay: 460ms;
 }
 
+.hero-title-sticky {
+  --hero-cover-progress: 0;
+  position: sticky;
+  top: 3.5rem;
+  z-index: 0;
+  transform: scale(calc(1 - var(--hero-cover-progress) * 0.06));
+  transform-origin: 50% 0;
+  opacity: calc(1 - var(--hero-cover-progress) * 0.6);
+  will-change: transform, opacity;
+}
+
+/* The visible hero (without the cover spacer) fills the whole first screen. */
+.scroll-stack-section-01 {
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100svh + var(--hero-cover-space, 0px));
+}
+
+.hero-info-cover {
+  position: relative;
+  z-index: 1;
+  flex-grow: 1;
+}
+
+/* Sticky elements can't move into parent padding, so the extra space must be a real element. */
+.hero-cover-spacer {
+  flex-shrink: 0;
+  height: var(--hero-cover-space, 0px);
+}
+
+.scroll-stack-section-02 {
+  margin-top: calc(-1 * var(--hero-cover-space, 0px));
+}
+
+@media (min-width: 40rem) {
+  .hero-title-sticky {
+    top: 5.5rem;
+  }
+}
+
 .hero-line-reveal {
   animation: hero-line-reveal 500ms cubic-bezier(0.22, 1, 0.36, 1) 1250ms both;
 }
@@ -219,6 +292,15 @@ body {
   .hero-title-line > span {
     animation: none;
     transform: none;
+  }
+
+  .hero-title-sticky {
+    transform: none;
+    opacity: 1;
+  }
+
+  .statement-scroll {
+    height: auto;
   }
 
   .about-reveal {
