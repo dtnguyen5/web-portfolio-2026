@@ -1,12 +1,22 @@
 "use client";
 
 import Image from "next/image";
-import { MouseEvent, useRef, useState } from "react";
+import { MouseEvent, useRef, useState, useSyncExternalStore } from "react";
+import { createPortal } from "react-dom";
 import { services } from "@/data/portfolio";
+
+const subscribeNoop = () => () => {};
 
 const ServiceList = () => {
   const [activeService, setActiveService] = useState<number | null>(null);
   const previewRef = useRef<HTMLDivElement>(null);
+  // The preview lives in <body>: the section's reveal animation transforms it,
+  // which would make `position: fixed` relative to the section, not the screen.
+  const portalTarget = useSyncExternalStore(
+    subscribeNoop,
+    () => document.body,
+    () => null,
+  );
 
   const movePreview = (event: MouseEvent<HTMLElement>) => {
     const preview = previewRef.current;
@@ -36,7 +46,10 @@ const ServiceList = () => {
                 current === index ? null : index,
               )
             }
-            onMouseEnter={() => setActiveService(index)}
+            onMouseEnter={(event) => {
+              movePreview(event);
+              setActiveService(index);
+            }}
             onMouseLeave={() => setActiveService(null)}
             onMouseMove={movePreview}
           >
@@ -82,25 +95,29 @@ const ServiceList = () => {
           </article>
         );
       })}
-      <div
-        className={`service-preview pointer-events-none fixed left-0 top-0 z-50 hidden aspect-[1.45] w-55 -translate-y-1/2 -rotate-1 overflow-hidden rounded-xl border border-[#f1f0ec]/20 bg-[#191919] shadow-2xl transition-[opacity,transform] duration-300 ease-out md:block ${
-          activeService === null ? "opacity-0" : "opacity-100 rotate-[3deg]"
-        }`}
-        ref={previewRef}
-      >
-        {activeService !== null && (
-          <Image
-            className="object-cover"
-            src={services[activeService].image}
-            alt={`Ukázka oboru ${services[activeService].title}`}
-            fill
-            quality={90}
-            // Rendered at twice its size so it stays sharp on retina screens
-            // and while the card is tilted.
-            sizes="440px"
-          />
+      {portalTarget &&
+        createPortal(
+          <div
+            className={`service-preview pointer-events-none fixed left-0 top-0 z-50 hidden aspect-[1.45] w-55 -translate-y-1/2 -rotate-1 overflow-hidden rounded-xl border border-[#f1f0ec]/20 bg-[#191919] shadow-2xl transition-[opacity,transform] duration-300 ease-out md:block ${
+              activeService === null ? "opacity-0" : "opacity-100 rotate-3"
+            }`}
+            ref={previewRef}
+          >
+            {/* Rendered at twice its size so it stays sharp on retina screens
+                and while the card is tilted. */}
+            {activeService !== null && (
+              <Image
+                className="object-cover"
+                src={services[activeService].image}
+                alt={`Ukázka oboru ${services[activeService].title}`}
+                fill
+                quality={90}
+                sizes="440px"
+              />
+            )}
+          </div>,
+          portalTarget,
         )}
-      </div>
     </div>
   );
 };
