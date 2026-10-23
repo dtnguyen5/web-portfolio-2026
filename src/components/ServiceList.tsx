@@ -76,22 +76,6 @@ const ServiceList = () => {
                 <span key={skill}>{skill}</span>
               ))}
             </div>
-            <div
-              className={`mt-7 overflow-hidden rounded-xl border border-[#30302e] bg-[#191919] sm:hidden ${
-                isActive ? "block" : "hidden"
-              }`}
-            >
-              <div className="relative aspect-[1.45]">
-                <Image
-                  className="object-cover"
-                  src={service.image}
-                  alt={`Ukázka oboru ${service.title}`}
-                  fill
-                  quality={90}
-                  sizes="100vw"
-                />
-              </div>
-            </div>
           </article>
         );
       })}
