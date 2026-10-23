@@ -22,6 +22,23 @@ body {
   margin: 0;
 }
 
+/* Text fields get a white outline while someone types in them. Set here because the
+   global border colour above outranks Tailwind's border utilities. */
+.form-field {
+  transition:
+    border-color 300ms ease,
+    box-shadow 300ms ease;
+}
+
+.form-field:hover {
+  border-color: #5a5a57;
+}
+
+.form-field:focus {
+  border-color: #f1f0ec;
+  box-shadow: 0 0 0 1px #f1f0ec;
+}
+
 .about-sidebar {
   position: static;
 }
@@ -62,8 +79,15 @@ body {
   z-index: calc(1 + var(--stack-index));
   display: flex;
   flex-direction: column;
-  height: calc(100svh - var(--projects-heading-height, 9rem) - 1rem);
-  min-height: 18rem;
+}
+
+/* Phones keep each card at its natural height (16:10 preview), larger screens
+   stretch it to fill the space below the sticky heading. */
+@media (min-width: 40rem) {
+  .project-stack-card {
+    height: calc(100svh - var(--projects-heading-height, 9rem) - 1rem);
+    min-height: 18rem;
+  }
 }
 
 /* Extra scroll length while the curved statement text slides along the arc. */
@@ -110,7 +134,7 @@ body {
   z-index: 7;
 }
 
-@media (min-width: 40rem) {
+@media (min-width: 64rem) {
   .about-sidebar {
     position: sticky;
     top: 2rem;
@@ -120,19 +144,6 @@ body {
   .about-sidebar-image {
     height: min(42.5rem, calc(100vh - 8.75rem));
   }
-}
-
-.about-reveal {
-  opacity: 0;
-  transform: translateY(2rem);
-  transition:
-    opacity 900ms cubic-bezier(0.22, 1, 0.36, 1),
-    transform 900ms cubic-bezier(0.22, 1, 0.36, 1);
-}
-
-.about-reveal.is-visible {
-  opacity: 1;
-  transform: translateY(0);
 }
 
 .scroll-reveal-section {
@@ -203,6 +214,82 @@ body {
   }
 }
 
+/* Mobile menu: the panel grows as a circle out of the burger button
+   (centre = 1.5rem side padding + half of the 2.75rem button). */
+.mobile-menu {
+  --menu-origin: calc(100% - 2.875rem) 2.375rem;
+  --menu-ease: cubic-bezier(0.76, 0, 0.24, 1);
+  visibility: hidden;
+  clip-path: circle(0 at var(--menu-origin));
+  transition:
+    clip-path 700ms var(--menu-ease) 250ms,
+    visibility 0s linear 950ms;
+}
+
+.mobile-menu.is-open {
+  visibility: visible;
+  clip-path: circle(150% at var(--menu-origin));
+  transition:
+    clip-path 900ms var(--menu-ease),
+    visibility 0s;
+}
+
+/* Link text rises from behind a mask, like the hero headline. */
+.mobile-menu-reveal {
+  translate: 0 110%;
+  transition: translate 400ms cubic-bezier(0.55, 0, 1, 0.45);
+}
+
+.mobile-menu-fade {
+  opacity: 0;
+  transition: opacity 250ms ease-out;
+}
+
+.mobile-menu-line {
+  scale: 0 1;
+  transform-origin: left;
+  transition: scale 400ms cubic-bezier(0.55, 0, 1, 0.45);
+}
+
+.mobile-menu.is-open .mobile-menu-reveal {
+  translate: 0 0;
+  transition: translate 900ms cubic-bezier(0.22, 1, 0.36, 1)
+    calc(400ms + var(--item-delay, 0ms));
+}
+
+.mobile-menu.is-open .mobile-menu-fade {
+  opacity: 1;
+  transition: opacity 700ms ease-out calc(650ms + var(--item-delay, 0ms));
+}
+
+.mobile-menu.is-open .mobile-menu-line {
+  scale: 1 1;
+  transition: scale 1000ms cubic-bezier(0.65, 0, 0.35, 1)
+    calc(450ms + var(--item-delay, 0ms));
+}
+
+/* Uses `translate` so it never fights with elements that animate `transform`. */
+@keyframes block-reveal {
+  from {
+    opacity: 0;
+    translate: 0 3.5rem;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+.block-reveal:not(.is-visible) {
+  opacity: 0;
+}
+
+.block-reveal.is-visible {
+  animation: block-reveal 1100ms cubic-bezier(0.22, 1, 0.36, 1)
+    var(--reveal-delay, 0ms) both;
+}
+
 .hero-reveal {
   animation: hero-reveal 1s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -241,11 +328,24 @@ body {
   will-change: transform, opacity;
 }
 
-/* The visible hero (without the cover spacer) fills the whole first screen. */
+/* From tablets up, the visible hero (without the cover spacer) fills the whole first screen. */
 .scroll-stack-section-01 {
   display: flex;
   flex-direction: column;
-  min-height: calc(100svh + var(--hero-cover-space, 0px));
+}
+
+@media (min-width: 40rem) {
+  .scroll-stack-section-01 {
+    min-height: calc(100svh + var(--hero-cover-space, 0px));
+  }
+}
+
+/* On phones the hero is only as tall as its content, so a small gap stays
+   below the info text before the next section slides in. */
+@media (max-width: 39.99rem) {
+  .hero-info-cover {
+    padding-bottom: 2.5rem;
+  }
 }
 
 .hero-info-cover {
@@ -303,10 +403,15 @@ body {
     height: auto;
   }
 
-  .about-reveal {
-    opacity: 1;
-    transform: none;
-    transition: none;
+  .mobile-menu,
+  .mobile-menu * {
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+  }
+
+  .block-reveal {
+    opacity: 1 !important;
+    animation: none !important;
   }
 
   .scroll-reveal-section {

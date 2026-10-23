@@ -1,7 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import {
+  CSSProperties,
+  FormEvent,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { contact, experience, tools } from "@/data/portfolio";
 import Arrow from "./Arrow";
 import ProjectList from "./ProjectList";
@@ -13,6 +19,45 @@ import SmoothScroll from "./SmoothScroll";
 const contentPadding = "px-6 sm:px-[5.56vw]";
 const buttonClass =
   "inline-flex h-13 items-center gap-6 rounded-full bg-[#f1f0ec] px-6 text-base font-medium text-[#080808]";
+// Hover fill that rises from the bottom; add the fill colour with `before:bg-*`.
+const fillHoverClass =
+  "relative isolate overflow-hidden transition-colors duration-600 ease-[cubic-bezier(0.33,1,0.68,1)] before:absolute before:inset-x-0 before:-bottom-1/4 before:-z-10 before:h-[150%] before:translate-y-full before:rounded-[50%_50%_0_0] before:transition-[translate,border-radius] before:duration-600 before:ease-[cubic-bezier(0.33,1,0.68,1)] hover:before:translate-y-0 hover:before:rounded-none focus-visible:before:translate-y-0 focus-visible:before:rounded-none";
+const socialLinks = [
+  {
+    label: "Instagram",
+    href: "https://www.instagram.com/dtnguyen5_/",
+    icon: (
+      <>
+        <rect x="2" y="2" width="20" height="20" rx="5" />
+        <circle cx="12" cy="12" r="4" />
+        <path d="M17.5 6.5h.01" />
+      </>
+    ),
+  },
+  {
+    label: "LinkedIn",
+    href: "https://www.linkedin.com/in/duy-tiep-nguyen-7325002a3/",
+    icon: (
+      <>
+        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z" />
+        <rect x="2" y="9" width="4" height="12" />
+        <circle cx="4" cy="4" r="2" />
+      </>
+    ),
+  },
+  {
+    label: "GitHub",
+    href: "https://github.com/dtnguyen5",
+    icon: (
+      <>
+        <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
+        <path d="M9 18c-4.51 2-5-2-7-2" />
+      </>
+    ),
+  },
+];
+const navLinkClass =
+  "transition-colors duration-500 ease-in-out hover:text-[#a5a5a2]";
 
 const Portfolio = () => {
   const [sent, setSent] = useState(false);
@@ -28,29 +73,13 @@ const Portfolio = () => {
   const statementStarRef = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    const revealItems = document.querySelectorAll<HTMLElement>(".about-reveal");
     const sectionRevealItems =
       document.querySelectorAll<HTMLElement>(".scroll-reveal-section");
 
     if (!("IntersectionObserver" in window)) {
-      revealItems.forEach((item) => item.classList.add("is-visible"));
       sectionRevealItems.forEach((item) => item.classList.add("is-visible"));
       return;
     }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add("is-visible");
-            observer.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.18 },
-    );
-
-    revealItems.forEach((item) => observer.observe(item));
 
     const sectionObserver = new IntersectionObserver(
       (entries) => {
@@ -80,9 +109,65 @@ const Portfolio = () => {
     });
 
     return () => {
-      observer.disconnect();
       sectionObserver.disconnect();
       window.removeEventListener("scroll", revealSectionsOnScroll);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (
+      !("IntersectionObserver" in window) ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+
+    // Content blocks below the hero slide in as they scroll into view.
+    // The projects section is left out, its stacking cards animate on their own.
+    const revealBlocks = [
+      ...document.querySelectorAll<HTMLElement>(
+        [
+          "#o-mne > .font-mono",
+          "#o-mne .about-sidebar",
+          "#o-mne .about-content > article",
+          "#o-mne article > .mt-8:has(> h3)",
+          "#o-mne article > .mt-8 > .border-t",
+          "#sluzby > div:first-child",
+          "#sluzby .service-row",
+          "#kontakt > .font-mono",
+          "#kontakt > div:last-child > *",
+          "main > footer > *",
+        ].join(", "),
+      ),
+    ];
+
+    revealBlocks.forEach((item) => item.classList.add("block-reveal"));
+
+    const reveal: IntersectionObserverCallback = (entries, observer) => {
+      entries
+        .filter((entry) => entry.isIntersecting)
+        .forEach((entry, index) => {
+          const item = entry.target as HTMLElement;
+          item.style.setProperty("--reveal-delay", `${Math.min(index, 4) * 140}ms`);
+          item.classList.add("is-visible");
+          observer.unobserve(item);
+        });
+    };
+    const observer = new IntersectionObserver(reveal, {
+      rootMargin: "0px 0px -10% 0px",
+    });
+    // The footer ends the page, so its last rows can never scroll above the
+    // bottom margin used for the other blocks.
+    const footerObserver = new IntersectionObserver(reveal);
+
+    revealBlocks.forEach((item) =>
+      (item.closest("footer") ? footerObserver : observer).observe(item),
+    );
+
+    return () => {
+      observer.disconnect();
+      footerObserver.disconnect();
+      revealBlocks.forEach((item) => item.classList.remove("block-reveal", "is-visible"));
     };
   }, []);
 
@@ -150,7 +235,7 @@ const Portfolio = () => {
     const measure = () => {
       const rem = parseFloat(getComputedStyle(document.documentElement).fontSize);
       const isDesktop = window.matchMedia("(min-width: 40rem)").matches;
-      const isWide = window.matchMedia("(min-width: 80rem)").matches;
+      const isWide = window.matchMedia("(min-width: 82rem)").matches;
       const titleFontSize = parseFloat(getComputedStyle(title).fontSize);
       const scale = Math.min(1, ((isDesktop ? 2 : 1.75) * rem) / titleFontSize);
       const targetTop = (isWide ? 3.125 : isDesktop ? 7.25 : 4.75) * rem;
@@ -270,6 +355,36 @@ const Portfolio = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (!menuOpen) {
+      return;
+    }
+
+    // The page underneath must not scroll while the mobile menu is open.
+    const root = document.documentElement;
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setMenuOpen(false);
+      }
+    };
+    const closeOnDesktop = (event: MediaQueryListEvent) => {
+      if (event.matches) {
+        setMenuOpen(false);
+      }
+    };
+    const desktopQuery = window.matchMedia("(min-width: 40rem)");
+
+    root.style.overflow = "hidden";
+    window.addEventListener("keydown", closeOnEscape);
+    desktopQuery.addEventListener("change", closeOnDesktop);
+
+    return () => {
+      root.style.overflow = "";
+      window.removeEventListener("keydown", closeOnEscape);
+      desktopQuery.removeEventListener("change", closeOnDesktop);
+    };
+  }, [menuOpen]);
+
   const submitForm = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSent(true);
@@ -280,8 +395,13 @@ const Portfolio = () => {
       <SmoothCursor />
       <SmoothScroll />
       <main className="overflow-x-clip">
-        <nav className="hero-reveal fixed inset-x-0 top-5 z-50 flex h-11 items-center justify-between bg-transparent px-6 sm:top-8 sm:h-19 sm:justify-center sm:px-[5.56vw]">
-          <a className="sm:hidden" href="#domu" aria-label="Domů">
+        <nav className="hero-reveal fixed inset-x-0 top-0 z-70 flex items-center justify-between bg-[#080808]/80 px-6 py-4 backdrop-blur-md sm:top-8 sm:h-19 sm:justify-center sm:bg-transparent sm:px-[5.56vw] sm:py-0 sm:backdrop-blur-none">
+          <a
+            className="sm:hidden"
+            href="#domu"
+            aria-label="Domů"
+            onClick={() => setMenuOpen(false)}
+          >
             <Image
               src="/Osobní značka.svg"
               alt="Honza"
@@ -289,7 +409,7 @@ const Portfolio = () => {
               height={34}
             />
           </a>
-          <div className="hidden items-center gap-6 rounded-full border border-[#1f1f1f] bg-[#080808] px-3 py-2.5 text-base font-medium text-[#f1f0ec] sm:flex sm:w-118 sm:justify-center">
+          <div className="hidden items-center gap-7 rounded-full border border-[#1f1f1f] bg-[#080808] py-2.5 pl-9 pr-6 text-base font-medium text-[#f1f0ec] sm:flex">
             <a href="#domu" aria-label="Domů">
               <Image
                 src="/Osobní značka.svg"
@@ -298,19 +418,19 @@ const Portfolio = () => {
                 height={30}
               />
             </a>
-            <div className="flex items-center gap-6">
-              <a className="hover:text-[#a5a5a2]" href="#domu">
+            <div className="flex items-center gap-7">
+              <a className={navLinkClass} href="#domu">
                 Domů
               </a>
-              <a className="hover:text-[#a5a5a2]" href="#o-mne">
+              <a className={navLinkClass} href="#o-mne">
                 O mně
               </a>
-              <a className="hover:text-[#a5a5a2]" href="#projekty">
+              <a className={navLinkClass} href="#projekty">
                 Projekty
               </a>
             </div>
             <a
-              className="rounded-full bg-[#1f1f1f] px-5 py-2.5 hover:bg-[#30302e]"
+              className={`${fillHoverClass} rounded-full bg-[#1f1f1f] px-5 py-2.5 before:bg-[#f1f0ec] hover:text-[#080808] focus-visible:text-[#080808]`}
               href="#kontakt"
             >
               Napište mi
@@ -320,38 +440,113 @@ const Portfolio = () => {
             className="flex h-11 w-11 items-center justify-center rounded-full border border-[#f5f2e9] sm:hidden"
             type="button"
             onClick={() => setMenuOpen((isOpen) => !isOpen)}
-            aria-label="Otevřít menu"
+            aria-label={menuOpen ? "Zavřít menu" : "Otevřít menu"}
             aria-expanded={menuOpen}
+            aria-controls="mobile-menu"
           >
-            <span className="flex w-5.5 flex-col gap-1.5" aria-hidden="true">
-              <span className="h-px w-full bg-[#f5f2e9]" />
-              <span className="h-px w-full bg-[#f5f2e9]" />
+            {/* The two lines turn into a cross while the menu is open. */}
+            <span className="relative h-1.75 w-5.5" aria-hidden="true">
+              <span
+                className={`absolute inset-x-0 top-0 h-px bg-[#f5f2e9] transition-[translate,rotate] duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] ${
+                  menuOpen ? "translate-y-0.75 rotate-45" : ""
+                }`}
+              />
+              <span
+                className={`absolute inset-x-0 bottom-0 h-px bg-[#f5f2e9] transition-[translate,rotate] duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] ${
+                  menuOpen ? "-translate-y-0.75 -rotate-45" : ""
+                }`}
+              />
             </span>
           </button>
         </nav>
-      <section
-        className={`scroll-stack-section scroll-stack-section-01 ${contentPadding} bg-[#080808] pb-0 pt-14 sm:pt-22`}
-        id="domu"
-      >
-        {menuOpen && (
-          <div className="mt-5 flex flex-col gap-4 rounded-lg border border-[#30302e] p-4 text-sm text-[#a5a5a2] sm:hidden">
+        {/* The panel grows as a circle out of the burger button, then the
+            links rise from behind a mask like the hero headline. */}
+        <div
+          className={`mobile-menu fixed inset-0 z-60 flex flex-col overflow-y-auto bg-[#080808] px-6 pb-10 pt-4 sm:hidden ${
+            menuOpen ? "is-open" : ""
+          }`}
+          id="mobile-menu"
+          inert={!menuOpen}
+          data-lenis-prevent
+        >
+          {/* Space for the fixed nav bar, whose logo and button stay on top of the menu. */}
+          <div className="h-11 shrink-0" aria-hidden="true" />
+          <nav className="mt-16 flex flex-col">
             {[
               ["Domů", "#domu"],
               ["O mně", "#o-mne"],
               ["Projekty", "#projekty"],
               ["Napište mi", "#kontakt"],
-            ].map(([label, href]) => (
+            ].map(([label, href], index) => (
               <a
+                className="mobile-menu-link group relative flex items-center justify-between py-5 text-[1.75rem] font-medium tracking-[-.04em] text-[#f1f0ec]"
                 href={href}
                 key={href}
                 onClick={() => setMenuOpen(false)}
-                className="hover:text-[#f1f0ec]"
+                style={{ "--item-delay": `${index * 90}ms` } as CSSProperties}
               >
-                {label}
+                <span className="overflow-hidden">
+                  <span className="mobile-menu-reveal block">
+                    <span className="block transition-[color,translate] duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover:translate-x-2 group-hover:text-[#a5a5a2] group-active:text-[#a5a5a2]">
+                      {label}
+                    </span>
+                  </span>
+                </span>
+                <span className="mobile-menu-fade">
+                  <Arrow
+                    className="brightness-0 invert transition-[rotate] duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover:rotate-45 group-active:rotate-45"
+                    size={18}
+                  />
+                </span>
+                <span
+                  aria-hidden="true"
+                  className="mobile-menu-line absolute inset-x-0 bottom-0 h-px bg-[#30302e]"
+                />
               </a>
             ))}
+          </nav>
+          <div
+            className="mobile-menu-fade mt-10 flex flex-col gap-3"
+            style={{ "--item-delay": "360ms" } as CSSProperties}
+          >
+            <a className="text-lg text-[#f1f0ec] transition-colors duration-500 hover:text-[#a5a5a2]" href={`tel:${contact.phone.replace(/\s/g, "")}`}>
+              {contact.phone}
+            </a>
+            <a className="text-sm text-[#a5a5a2] transition-colors duration-500 hover:text-[#f1f0ec]" href={`mailto:${contact.email}`}>
+              {contact.email}
+            </a>
+            <div className="mt-6 flex gap-3 text-[#f1f0ec]">
+              {socialLinks.map(({ label, href, icon }) => (
+                <a
+                  aria-label={label}
+                  className={`${fillHoverClass} flex h-11 w-11 items-center justify-center rounded-full border before:bg-[#f1f0ec] hover:text-[#080808] focus-visible:text-[#080808]`}
+                  href={href}
+                  key={label}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  <svg
+                    width="18"
+                    height="18"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    aria-hidden="true"
+                  >
+                    {icon}
+                  </svg>
+                </a>
+              ))}
+            </div>
           </div>
-        )}
+        </div>
+      <section
+        className={`scroll-stack-section scroll-stack-section-01 ${contentPadding} bg-[#080808] pb-0 pt-14 sm:pt-22`}
+        id="domu"
+      >
         <div className="hero-title-sticky" ref={heroTitleRef}>
         <div className="hero-reveal hero-meta flex flex-col gap-7 pb-0 pt-7 font-mono text-xs leading-6 text-[#a5a5a2] sm:flex-row sm:items-center sm:justify-between sm:pb-7 sm:pt-16">
           <span>WEB DESIGN / DEVELOPMENT / GRAFIKA</span>
@@ -396,9 +591,9 @@ const Portfolio = () => {
         id="o-mne"
       >
         <SectionLabel>O MNĚ</SectionLabel>
-        <div className="mt-10 grid gap-10 sm:mt-12 sm:grid-cols-[32.5rem_1fr] sm:gap-[6.67vw]">
+        <div className="mt-10 grid gap-10 sm:mt-12 lg:grid-cols-[minmax(0,32.5rem)_1fr] lg:gap-[6.67vw]">
           <div className="about-sidebar">
-            <div className="about-sidebar-image relative h-110 overflow-hidden rounded-2xl sm:h-170">
+            <div className="about-sidebar-image relative h-110 overflow-hidden rounded-2xl sm:h-136 lg:h-170">
               <Image
                 className="object-cover"
                 src="/workspace.png"
@@ -417,7 +612,7 @@ const Portfolio = () => {
             </div>
           </div>
           <div className="about-content">
-            <article className="about-reveal border-t border-[#30302e] py-6 sm:pb-16 sm:pt-8 sm:pr-12">
+            <article className="border-t border-[#30302e] py-6 sm:pb-16 sm:pt-8 sm:pr-12">
               <SectionLabel>01 / 03</SectionLabel>
               <h2 className="my-5 text-4xl leading-tight tracking-[-.05em] sm:text-[3.25rem]">
                 Kdo jsem
@@ -431,7 +626,7 @@ const Portfolio = () => {
                 bezproblémový výsledek.
               </p>
             </article>
-            <article className="about-reveal border-t border-[#30302e] py-6 !pb-0 sm:pt-10">
+            <article className="border-t border-[#30302e] py-6 !pb-0 sm:pt-10">
               <SectionLabel>02 / 03</SectionLabel>
               <h2 className="my-5 text-4xl leading-tight tracking-[-.05em] sm:text-[3.25rem]">
                 Škola &amp; praxe
@@ -513,7 +708,7 @@ const Portfolio = () => {
           <div className="projects-heading-label">
             <SectionLabel number="03">PROJEKTY</SectionLabel>
           </div>
-          <h2 className="projects-heading-title m-0 mt-9 text-[2.6875rem] leading-tight tracking-[-.06em] sm:mt-11 sm:text-[5.5rem]">
+          <h2 className="projects-heading-title m-0 mt-9 whitespace-nowrap text-[clamp(2rem,9vw,2.6875rem)] leading-tight tracking-[-.06em] sm:mt-11 sm:text-[5.5rem]">
             Zpracované projekty
           </h2>
         </div>
@@ -586,16 +781,16 @@ const Portfolio = () => {
         id="kontakt"
       >
         <SectionLabel number="04">KONTAKT</SectionLabel>
-        <div className="mt-8 flex flex-col gap-8 sm:mt-12 sm:grid sm:grid-cols-[30rem_1fr] sm:gap-20">
+        <div className="mt-8 flex flex-col gap-8 sm:mt-12 lg:grid lg:grid-cols-[minmax(0,30rem)_1fr] lg:gap-20">
           <div>
-            <h2 className="mb-4 text-[2.8125rem] tracking-[-.06em] sm:hidden">
+            <h2 className="mb-4 text-[2.8125rem] tracking-[-.06em] sm:text-[4rem] lg:hidden">
               Napište mi
             </h2>
-            <p className="mb-8 leading-6 text-[#a5a5a2] sm:hidden">
+            <p className="mb-8 leading-6 text-[#a5a5a2] sm:text-lg lg:hidden">
               Máte nápad, projekt nebo jen otázku? Ozvěte se mi a společně
               vymyslíme další krok.
             </p>
-            <div className="relative h-[21.25rem] overflow-hidden rounded-2xl sm:h-180">
+            <div className="relative h-[21.25rem] overflow-hidden rounded-2xl sm:h-120 lg:h-180">
               <Image
                 className="object-cover"
                 src="/workspace-detail.png"
@@ -603,13 +798,10 @@ const Portfolio = () => {
                 fill
                 sizes="(max-width: 700px) 342px, 480px"
               />
-              <span className="absolute bottom-4 left-4 bg-[#080808] px-3 py-2.5 font-mono text-xs text-[#a5a5a2]">
-                KONCEPČNÍ VIZUÁL
-              </span>
             </div>
           </div>
           <form className="flex flex-col" onSubmit={submitForm}>
-            <div className="hidden sm:block">
+            <div className="hidden lg:block">
               <h2 className="m-0 text-[4rem] leading-[1.1] tracking-[-.06em]">
                 Napište mi
               </h2>
@@ -629,7 +821,7 @@ const Portfolio = () => {
                 >
                   {label}
                   <input
-                    className="h-[3.625rem] rounded-lg border border-[#30302e] bg-[#191919] px-5 text-base font-normal outline-none placeholder:text-[#727270]"
+                    className="form-field h-[3.625rem] rounded-lg border border-[#30302e] bg-[#191919] px-5 text-base font-normal outline-none placeholder:text-[#727270]"
                     required
                     name={label.toLowerCase()}
                     type={type}
@@ -640,28 +832,50 @@ const Portfolio = () => {
             </div>
             <label className="mt-6 flex flex-col gap-3 text-sm font-medium">
               Předmět
-              <select
-                className="h-[3.625rem] rounded-lg border border-[#30302e] bg-[#191919] px-5 text-base font-normal text-[#a5a5a2] outline-none"
-                defaultValue=""
-              >
-                <option value="" disabled>
-                  Vyberte předmět…
-                </option>
-                <option>Web design</option>
-                <option>Vývoj webu</option>
-                <option>Grafika</option>
-              </select>
+              <span className="relative">
+                <select
+                  className="h-[3.625rem] w-full appearance-none rounded-lg border border-[#30302e] bg-[#191919] pl-5 pr-14 text-base font-normal text-[#a5a5a2] outline-none"
+                  defaultValue=""
+                >
+                  <option value="" disabled>
+                    Vyberte předmět…
+                  </option>
+                  <option>Web design</option>
+                  <option>Vývoj webu</option>
+                  <option>Grafika</option>
+                </select>
+                <svg
+                  className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-[#a5a5a2]"
+                  width="14"
+                  height="14"
+                  viewBox="0 0 14 14"
+                  fill="none"
+                  aria-hidden="true"
+                >
+                  <path
+                    d="M3 5.25 7 9.25l4-4"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
             </label>
             <label className="mt-6 flex flex-col gap-3 text-sm font-medium">
               Zpráva
               <textarea
-                className="h-40 resize-y rounded-lg border border-[#30302e] bg-[#191919] px-5 pt-5 text-base font-normal outline-none placeholder:text-[#727270]"
+                className="form-field h-40 resize-y rounded-lg border border-[#30302e] bg-[#191919] px-5 pt-5 text-base font-normal outline-none placeholder:text-[#727270]"
                 required
                 placeholder="Vaše zpráva…"
               />
             </label>
-            <button className={`${buttonClass} mt-7 self-start`} type="submit">
-              Odeslat <Arrow />
+            <button
+              className={`${buttonClass} ${fillHoverClass} group mt-7 self-start border before:bg-[#1f1f1f] hover:text-[#f1f0ec] focus-visible:text-[#f1f0ec]`}
+              type="submit"
+            >
+              Odeslat{" "}
+              <Arrow className="transition-[rotate,filter] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:rotate-45 group-hover:invert group-focus-visible:rotate-45 group-focus-visible:invert" />
             </button>
             {sent && (
               <p className="text-[#d9ff6a]" role="status">
@@ -680,7 +894,7 @@ const Portfolio = () => {
           </h2>
         </div>
         <div className="h-px bg-[#30302e]" />
-        <div className="flex flex-col gap-3 py-7 text-xl sm:flex-row sm:justify-between sm:py-10 sm:text-[2.75rem]">
+        <div className="flex flex-col gap-3 whitespace-nowrap py-7 text-xl sm:flex-row sm:flex-wrap sm:justify-between sm:gap-x-10 sm:py-10 sm:text-3xl lg:text-[2.75rem]">
           <a href={`mailto:${contact.email}`}>{contact.email}</a>
           <a href={`tel:${contact.phone.replace(/\s/g, "")}`}>
             {contact.phone}
@@ -690,15 +904,18 @@ const Portfolio = () => {
         <div className="grid gap-5 pt-6 font-mono text-[0.625rem] text-[#a5a5a2] sm:flex sm:items-center sm:justify-between">
           <span>©2026 HONZA</span>
           <div className="order-3 flex justify-between gap-2 text-[#f1f0ec] sm:order-none sm:gap-7">
-            <a className="flex items-center gap-1.5" href="#">
-              INSTAGRAM <Arrow className="brightness-0 invert" size={12} />
-            </a>
-            <a className="flex items-center gap-1.5" href="#">
-              LINKEDIN <Arrow className="brightness-0 invert" size={12} />
-            </a>
-            <a className="flex items-center gap-1.5" href="#">
-              GITHUB <Arrow className="brightness-0 invert" size={12} />
-            </a>
+            {socialLinks.map(({ label, href }) => (
+              <a
+                className="flex items-center gap-1.5"
+                href={href}
+                key={label}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                {label.toUpperCase()}{" "}
+                <Arrow className="brightness-0 invert" size={12} />
+              </a>
+            ))}
           </div>
           <span>DESIGNED &amp; DEVELOPED BY ME</span>
         </div>

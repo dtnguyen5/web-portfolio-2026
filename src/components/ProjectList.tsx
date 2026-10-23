@@ -24,7 +24,7 @@ const ProjectList = () => (
             <Arrow />
           </span>
         </div>
-        <div className="project-image relative min-h-0 flex-1 bg-[#080808]">
+        <div className="project-image relative aspect-16/10 bg-[#080808] sm:aspect-auto sm:min-h-0 sm:flex-1">
           <Image
             className="object-cover"
             src={project.image}

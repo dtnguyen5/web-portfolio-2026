@@ -24,7 +24,7 @@ const ServiceList = () => {
 
         return (
           <article
-            className={`service-row group relative min-h-60 border-t border-[#30302e] py-7 sm:grid sm:min-h-44 sm:grid-cols-[3.5rem_1fr_35rem] sm:gap-6 sm:py-10 ${
+            className={`service-row group relative min-h-60 border-t border-[#30302e] py-7 sm:min-h-0 sm:py-10 lg:grid lg:min-h-44 lg:grid-cols-[3.5rem_1fr_minmax(0,35rem)] lg:gap-6 ${
               isActive ? "is-active" : ""
             }`}
             key={service.title}
@@ -48,14 +48,14 @@ const ServiceList = () => {
               {String(index + 1).padStart(2, "0")}
             </div>
             <h3
-              className={`mt-11 text-2xl tracking-[-.04em] transition-colors duration-300 sm:mt-0 sm:text-4xl ${
+              className={`mt-11 text-2xl tracking-[-.04em] transition-colors duration-300 sm:mt-6 sm:text-4xl lg:mt-0 ${
                 isActive ? "text-[#f1f0ec]" : "text-[#a5a5a2]"
               }`}
             >
               {service.title}
             </h3>
             <div
-              className={`mt-6 grid grid-cols-2 gap-x-6 gap-y-2.5 text-sm transition-colors duration-300 sm:mt-0 sm:text-base ${
+              className={`mt-6 grid grid-cols-2 gap-x-6 gap-y-2.5 text-sm transition-colors duration-300 sm:text-base lg:mt-0 ${
                 isActive ? "text-[#f1f0ec]" : "text-[#a5a5a2]"
               }`}
             >
