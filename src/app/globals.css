@@ -51,8 +51,11 @@ body {
   --compact-progress: 0;
   position: sticky;
   top: 0;
-  z-index: 40;
-  /* Layout keeps the full height; the visible part shrinks with the title. */
+  /* Below the cards: smooth scrolling paints a frame before the clip-path
+     catches up, and the card header must never slip under the heading. */
+  z-index: 0;
+  /* Layout keeps the full height; the visible part shrinks with the title.
+     JS also sets the clip-path inline, which Safari repaints reliably. */
   margin-bottom: calc(-1 * var(--projects-heading-collapse, 0px));
   clip-path: inset(
     0 0 calc(var(--projects-heading-collapse, 0px) * var(--compact-progress)) 0
@@ -325,7 +328,6 @@ body {
   transform: scale(calc(1 - var(--hero-cover-progress) * 0.06));
   transform-origin: 50% 0;
   opacity: calc(1 - var(--hero-cover-progress) * 0.6);
-  will-change: transform, opacity;
 }
 
 /* From tablets up, the visible hero (without the cover spacer) fills the whole first screen. */
@@ -362,6 +364,8 @@ body {
 
 .scroll-stack-section-02 {
   margin-top: calc(-1 * var(--hero-cover-space, 0px));
+  /* Own layer, so Safari on iPad can't paint the sticky hero title over it. */
+  transform: translateZ(0);
 }
 
 @media (min-width: 40rem) {

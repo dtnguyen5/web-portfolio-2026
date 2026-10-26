@@ -62,6 +62,8 @@ const navLinkClass =
 const Portfolio = () => {
   const [sent, setSent] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [navCompact, setNavCompact] = useState(false);
+  const [navActive, setNavActive] = useState(false);
   const heroTitleRef = useRef<HTMLDivElement>(null);
   const heroInfoRef = useRef<HTMLDivElement>(null);
   const projectsSectionRef = useRef<HTMLElement>(null);
@@ -257,6 +259,8 @@ const Portfolio = () => {
       const scrolled = Math.max(0, -section.getBoundingClientRect().top);
       const progress = collapse ? Math.min(scrolled / collapse, 1) : 0;
       heading.style.setProperty("--compact-progress", progress.toFixed(3));
+      // Set directly, Safari doesn't repaint a clip-path built from a custom property.
+      heading.style.clipPath = `inset(0 0 ${(collapse * progress).toFixed(1)}px 0)`;
     };
 
     const requestUpdate = () => {
@@ -356,6 +360,44 @@ const Portfolio = () => {
   }, []);
 
   useEffect(() => {
+    let frame = 0;
+    let lastY = window.scrollY;
+
+    // The desktop nav shrinks to the logo and button while scrolling down and
+    // opens again on scrolling up or near the top of the page.
+    const update = () => {
+      frame = 0;
+      const y = window.scrollY;
+      const delta = y - lastY;
+
+      if (y < 120) {
+        setNavCompact(false);
+      } else if (delta > 4) {
+        setNavCompact(true);
+      } else if (delta < -4) {
+        setNavCompact(false);
+      }
+
+      if (Math.abs(delta) > 4) {
+        lastY = y;
+      }
+    };
+
+    const requestUpdate = () => {
+      if (!frame) {
+        frame = requestAnimationFrame(update);
+      }
+    };
+
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", requestUpdate);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!menuOpen) {
       return;
     }
@@ -409,7 +451,21 @@ const Portfolio = () => {
               height={34}
             />
           </a>
-          <div className="hidden items-center gap-7 rounded-full border border-[#1f1f1f] bg-[#080808] py-2.5 pl-9 pr-6 text-base font-medium text-[#f1f0ec] sm:flex">
+          {/* While compact only the logo and button show; hovering or
+              focusing the pill opens the links again. */}
+          <div
+            className={`hidden items-center gap-4 rounded-full border border-[#1f1f1f] bg-[#080808] py-2.5 text-base font-medium text-[#f1f0ec] transition-[padding] duration-600 ease-[cubic-bezier(0.65,0,0.35,1)] sm:flex ${
+              navCompact && !navActive ? "pl-6 pr-2.5" : "pl-9 pr-6"
+            }`}
+            onMouseEnter={() => setNavActive(true)}
+            onMouseLeave={() => setNavActive(false)}
+            onFocus={() => setNavActive(true)}
+            onBlur={(event) => {
+              if (!event.currentTarget.contains(event.relatedTarget)) {
+                setNavActive(false);
+              }
+            }}
+          >
             <a href="#domu" aria-label="Domů">
               <Image
                 src="/Osobní značka.svg"
@@ -418,23 +474,46 @@ const Portfolio = () => {
                 height={30}
               />
             </a>
-            <div className="flex items-center gap-7">
-              <a className={navLinkClass} href="#domu">
-                Domů
-              </a>
-              <a className={navLinkClass} href="#o-mne">
-                O mně
-              </a>
-              <a className={navLinkClass} href="#projekty">
-                Projekty
-              </a>
-            </div>
-            <a
-              className={`${fillHoverClass} rounded-full bg-[#1f1f1f] px-5 py-2.5 before:bg-[#f1f0ec] hover:text-[#080808] focus-visible:text-[#080808]`}
-              href="#kontakt"
+            <div
+              className={`grid transition-[grid-template-columns,opacity] duration-600 ease-[cubic-bezier(0.65,0,0.35,1)] ${
+                navCompact && !navActive
+                  ? "grid-cols-[0fr] opacity-0"
+                  : "grid-cols-[1fr] opacity-100"
+              }`}
             >
-              Napište mi
-            </a>
+              <div className="overflow-hidden">
+                <div className="flex items-center gap-7 whitespace-nowrap px-3">
+                  <a className={navLinkClass} href="#domu">
+                    Domů
+                  </a>
+                  <a className={navLinkClass} href="#o-mne">
+                    O mně
+                  </a>
+                  <a className={navLinkClass} href="#sluzby">
+                    Služby
+                  </a>
+                  <a className={navLinkClass} href="#projekty">
+                    Projekty
+                  </a>
+                </div>
+              </div>
+            </div>
+            {navCompact && !navActive ? (
+              <span className="flex items-center gap-3 whitespace-nowrap py-2.5 pr-3">
+                <span
+                  className="h-1.5 w-1.5 rounded-full bg-[#f1f0ec]"
+                  aria-hidden="true"
+                />
+                Právě k dispozici
+              </span>
+            ) : (
+              <a
+                className={`${fillHoverClass} whitespace-nowrap rounded-full bg-[#1f1f1f] px-5 py-2.5 before:bg-[#f1f0ec] hover:text-[#080808] focus-visible:text-[#080808]`}
+                href="#kontakt"
+              >
+                Napište mi
+              </a>
+            )}
           </div>
           <button
             className="flex h-11 w-11 items-center justify-center rounded-full border border-[#f5f2e9] sm:hidden"
@@ -475,6 +554,7 @@ const Portfolio = () => {
             {[
               ["Domů", "#domu"],
               ["O mně", "#o-mne"],
+              ["Služby", "#sluzby"],
               ["Projekty", "#projekty"],
               ["Napište mi", "#kontakt"],
             ].map(([label, href], index) => (
@@ -507,7 +587,7 @@ const Portfolio = () => {
           </nav>
           <div
             className="mobile-menu-fade mt-10 flex flex-col gap-3"
-            style={{ "--item-delay": "360ms" } as CSSProperties}
+            style={{ "--item-delay": "450ms" } as CSSProperties}
           >
             <a className="text-lg text-[#f1f0ec] transition-colors duration-500 hover:text-[#a5a5a2]" href={`tel:${contact.phone.replace(/\s/g, "")}`}>
               {contact.phone}
@@ -842,7 +922,8 @@ const Portfolio = () => {
                   </option>
                   <option>Web design</option>
                   <option>Vývoj webu</option>
-                  <option>Grafika</option>
+                  <option>Grafický design</option>
+                  <option>Branding</option>
                 </select>
                 <svg
                   className="pointer-events-none absolute right-5 top-1/2 -translate-y-1/2 text-[#a5a5a2]"
