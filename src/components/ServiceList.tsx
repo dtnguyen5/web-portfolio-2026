@@ -1,14 +1,28 @@
 "use client";
 
 import Image from "next/image";
-import { MouseEvent, useRef, useState, useSyncExternalStore } from "react";
+import {
+  MouseEvent,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { createPortal } from "react-dom";
 import { services } from "@/data/portfolio";
 
 const subscribeNoop = () => () => {};
 
+const placePreview = (preview: HTMLElement | null, x: number, y: number) => {
+  if (preview) {
+    preview.style.left = `${x + 24}px`;
+    preview.style.top = `${y + 24}px`;
+  }
+};
+
 const ServiceList = () => {
   const [activeService, setActiveService] = useState<number | null>(null);
+  const listRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
   // The preview lives in <body>: the section's reveal animation transforms it,
   // which would make `position: fixed` relative to the section, not the screen.
@@ -18,17 +32,69 @@ const ServiceList = () => {
     () => null,
   );
 
-  const movePreview = (event: MouseEvent<HTMLElement>) => {
-    const preview = previewRef.current;
+  useEffect(() => {
+    const list = listRef.current;
 
-    if (preview) {
-      preview.style.left = `${event.clientX + 24}px`;
-      preview.style.top = `${event.clientY + 24}px`;
+    if (!list) {
+      return;
     }
-  };
+
+    let frame = 0;
+    let pointer: { x: number; y: number } | null = null;
+
+    // Scrolling moves the rows under a resting cursor without any mouse
+    // event, so the row under the cursor is looked up after every scroll.
+    const update = () => {
+      frame = 0;
+
+      if (!pointer) {
+        setActiveService(null);
+        return;
+      }
+
+      const row = document
+        .elementFromPoint(pointer.x, pointer.y)
+        ?.closest<HTMLElement>(".service-row");
+
+      if (row && list.contains(row)) {
+        placePreview(previewRef.current, pointer.x, pointer.y);
+        setActiveService(Number(row.dataset.index));
+      } else {
+        setActiveService(null);
+      }
+    };
+
+    // `mouseover` also comes from the browser's own hover check after a
+    // scroll, so the position is known even before the mouse has moved.
+    const trackPointer = (event: globalThis.MouseEvent) => {
+      if (!(event instanceof PointerEvent) || event.pointerType === "mouse") {
+        pointer = { x: event.clientX, y: event.clientY };
+      }
+    };
+
+    const requestUpdate = () => {
+      if (!frame) {
+        frame = requestAnimationFrame(update);
+      }
+    };
+
+    window.addEventListener("pointermove", trackPointer, { passive: true });
+    window.addEventListener("mouseover", trackPointer, { passive: true });
+    window.addEventListener("scroll", requestUpdate, { passive: true });
+
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener("pointermove", trackPointer);
+      window.removeEventListener("mouseover", trackPointer);
+      window.removeEventListener("scroll", requestUpdate);
+    };
+  }, []);
+
+  const movePreview = (event: MouseEvent<HTMLElement>) =>
+    placePreview(previewRef.current, event.clientX, event.clientY);
 
   return (
-    <div onMouseLeave={() => setActiveService(null)}>
+    <div ref={listRef} onMouseLeave={() => setActiveService(null)}>
       {services.map((service, index) => {
         const isActive = activeService === index;
 
@@ -38,6 +104,7 @@ const ServiceList = () => {
               isActive ? "is-active" : ""
             }`}
             key={service.title}
+            data-index={index}
             tabIndex={0}
             onFocus={() => setActiveService(index)}
             onBlur={() => setActiveService(null)}
