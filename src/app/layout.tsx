@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { IBM_Plex_Mono, Inter } from "next/font/google";
 import "./globals.css";
+import "./styles.scss";
 
 const inter = Inter({
   variable: "--font-inter",

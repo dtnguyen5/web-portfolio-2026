@@ -1,0 +1,456 @@
+@use "sass:map";
+
+// Colours shared with the Tailwind classes in the components.
+$color-text: #f1f0ec;
+$color-line: #30302e;
+$color-line-hover: #5a5a57;
+
+$ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+$ease-in: cubic-bezier(0.55, 0, 1, 0.45);
+$ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+$ease-menu: cubic-bezier(0.76, 0, 0.24, 1);
+
+// Same widths as Tailwind's `sm` and `lg`.
+$breakpoints: (
+  sm: 40rem,
+  lg: 64rem,
+);
+
+@mixin up($name) {
+  @media (min-width: map.get($breakpoints, $name)) {
+    @content;
+  }
+}
+
+@mixin down($name) {
+  $max: map.get($breakpoints, $name) - 0.01rem;
+
+  @media (max-width: $max) {
+    @content;
+  }
+}
+
+@mixin reduced-motion {
+  @media (prefers-reduced-motion: reduce) {
+    @content;
+  }
+}
+
+// Base
+
+* {
+  border-color: $color-line;
+}
+
+html {
+  scroll-behavior: smooth;
+
+  // Lenis animates the scroll itself (anchor links included).
+  &.lenis {
+    scroll-behavior: auto;
+  }
+}
+
+body {
+  margin: 0;
+
+  @media (pointer: fine) {
+    cursor: none;
+  }
+}
+
+// Text fields get a white outline while someone types in them. Set here because the
+// global border colour above outranks Tailwind's border utilities.
+.form-field {
+  transition:
+    border-color 300ms ease,
+    box-shadow 300ms ease;
+
+  &:hover {
+    border-color: $color-line-hover;
+  }
+
+  &:focus {
+    border-color: $color-text;
+    box-shadow: 0 0 0 1px $color-text;
+  }
+}
+
+// Keyframes
+
+@keyframes hero-reveal {
+  from {
+    opacity: 0;
+    transform: translateY(2rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-line-reveal {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@keyframes hero-text-reveal {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 105%, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@keyframes section-rise {
+  from {
+    transform: translate3d(0, 4.5rem, 0);
+  }
+
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+// Uses `translate` so it never fights with elements that animate `transform`.
+@keyframes block-reveal {
+  from {
+    opacity: 0;
+    translate: 0 3.5rem;
+  }
+
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+// Section stacking: each section slides over the previous one.
+
+.scroll-stack-section {
+  position: relative;
+  isolation: isolate;
+}
+
+@for $i from 1 through 7 {
+  .scroll-stack-section-0#{$i} {
+    z-index: $i;
+  }
+}
+
+// From tablets up, the visible hero (without the cover spacer) fills the whole first screen.
+.scroll-stack-section-01 {
+  display: flex;
+  flex-direction: column;
+
+  @include up(sm) {
+    min-height: calc(100svh + var(--hero-cover-space, 0px));
+  }
+}
+
+.scroll-stack-section-02 {
+  margin-top: calc(-1 * var(--hero-cover-space, 0px));
+  // Own layer, so Safari on iPad can't paint the sticky hero title over it.
+  transform: translateZ(0);
+}
+
+// Hero
+
+.hero-reveal {
+  animation: hero-reveal 1s $ease-out both;
+
+  @include reduced-motion {
+    animation: none;
+    transform: none;
+  }
+}
+
+.hero-title-line {
+  display: block;
+  overflow: hidden;
+
+  > span {
+    display: block;
+    animation: hero-text-reveal 900ms $ease-out both;
+    will-change: opacity, transform;
+
+    @include reduced-motion {
+      animation: none;
+      transform: none;
+    }
+  }
+}
+
+$hero-line-delays: (
+  primary: 100ms,
+  secondary: 280ms,
+  tertiary: 460ms,
+);
+
+@each $line, $delay in $hero-line-delays {
+  .hero-title-line-#{$line} > span {
+    animation-delay: $delay;
+  }
+}
+
+.hero-title-sticky {
+  --hero-cover-progress: 0;
+  position: sticky;
+  top: 3.5rem;
+  z-index: 0;
+  transform: scale(calc(1 - var(--hero-cover-progress) * 0.06));
+  transform-origin: 50% 0;
+  opacity: calc(1 - var(--hero-cover-progress) * 0.6);
+
+  @include up(sm) {
+    top: 5.5rem;
+  }
+
+  @include reduced-motion {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.hero-info-cover {
+  position: relative;
+  z-index: 1;
+  flex-grow: 1;
+
+  // On phones the hero is only as tall as its content, so a small gap stays
+  // below the info text before the next section slides in.
+  @include down(sm) {
+    padding-bottom: 2.5rem;
+  }
+}
+
+// Sticky elements can't move into parent padding, so the extra space must be a real element.
+.hero-cover-spacer {
+  flex-shrink: 0;
+  height: var(--hero-cover-space, 0px);
+}
+
+.hero-line-reveal {
+  animation: hero-line-reveal 500ms $ease-out 1250ms both;
+
+  @include reduced-motion {
+    animation: none;
+    transform: none;
+  }
+}
+
+$hero-reveal-delays: (
+  hero-info-left: 1500ms,
+  hero-info-right: 1750ms,
+  hero-meta: 2250ms,
+);
+
+@each $class, $delay in $hero-reveal-delays {
+  .#{$class} {
+    animation-delay: $delay !important;
+  }
+}
+
+// About
+
+.about-sidebar {
+  position: static;
+
+  @include up(lg) {
+    position: sticky;
+    top: 2rem;
+    align-self: start;
+  }
+}
+
+.about-sidebar-image {
+  @include up(lg) {
+    height: min(42.5rem, calc(100vh - 8.75rem));
+  }
+}
+
+.about-content {
+  min-width: 0;
+}
+
+// Projects
+
+$projects-collapse: var(--projects-heading-collapse, 0px);
+$projects-heading-height: var(--projects-heading-height, 9rem);
+
+.projects-heading {
+  --compact-progress: 0;
+  position: sticky;
+  top: 0;
+  // Below the cards: smooth scrolling paints a frame before the clip-path
+  // catches up, and the card header must never slip under the heading.
+  z-index: 0;
+  // Layout keeps the full height; the visible part shrinks with the title.
+  // JS also sets the clip-path inline, which Safari repaints reliably.
+  margin-bottom: calc(-1 * #{$projects-collapse});
+  clip-path: inset(0 0 calc(#{$projects-collapse} * var(--compact-progress)) 0);
+
+  &-label {
+    opacity: calc(1 - var(--compact-progress) * 1.5);
+  }
+
+  &-title {
+    transform-origin: 0 0;
+    transform: translateY(calc(var(--title-shift, 0px) * var(--compact-progress) * -1))
+      scale(calc(1 - (1 - var(--title-scale, 1)) * var(--compact-progress)));
+  }
+}
+
+.project-stack {
+  padding-top: $projects-collapse;
+}
+
+.project-stack-card {
+  position: sticky;
+  top: $projects-heading-height;
+  z-index: calc(1 + var(--stack-index));
+  display: flex;
+  flex-direction: column;
+
+  // Phones keep each card at its natural height (16:10 preview), larger screens
+  // stretch it to fill the space below the sticky heading.
+  @include up(sm) {
+    height: calc(100svh - #{$projects-heading-height} - 1rem);
+    min-height: 18rem;
+  }
+}
+
+// Extra scroll length while the curved statement text slides along the arc.
+.statement-scroll {
+  height: 280svh;
+
+  @include up(sm) {
+    height: 340svh;
+  }
+
+  @include reduced-motion {
+    height: auto;
+  }
+}
+
+// Scroll reveals
+
+.scroll-reveal-section {
+  opacity: 1;
+  transform: none;
+
+  &.is-visible {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+
+  @supports (animation-timeline: view()) {
+    &:not(.is-visible) {
+      animation: section-rise linear both;
+      animation-timeline: view();
+      animation-range: entry 0% cover 28%;
+    }
+  }
+
+  @include reduced-motion {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
+.block-reveal {
+  &:not(.is-visible) {
+    opacity: 0;
+  }
+
+  &.is-visible {
+    animation: block-reveal 1100ms $ease-out var(--reveal-delay, 0ms) both;
+  }
+
+  @include reduced-motion {
+    opacity: 1 !important;
+    animation: none !important;
+  }
+}
+
+// Mobile menu: the panel grows as a circle out of the burger button
+// (centre = 1.5rem side padding + half of the 2.75rem button).
+
+$menu-origin: calc(100% - 2.875rem) 2.375rem;
+
+.mobile-menu {
+  visibility: hidden;
+  clip-path: circle(0 at #{$menu-origin});
+  transition:
+    clip-path 700ms $ease-menu 250ms,
+    visibility 0s linear 950ms;
+
+  &.is-open {
+    visibility: visible;
+    clip-path: circle(150% at #{$menu-origin});
+    transition:
+      clip-path 900ms $ease-menu,
+      visibility 0s;
+  }
+
+  @include reduced-motion {
+    &,
+    * {
+      transition-duration: 0s !important;
+      transition-delay: 0s !important;
+    }
+  }
+}
+
+// Link text rises from behind a mask, like the hero headline.
+.mobile-menu-reveal {
+  translate: 0 110%;
+  transition: translate 400ms $ease-in;
+
+  .mobile-menu.is-open & {
+    translate: 0 0;
+    transition: translate 900ms $ease-out calc(400ms + var(--item-delay, 0ms));
+  }
+}
+
+.mobile-menu-fade {
+  opacity: 0;
+  transition: opacity 250ms ease-out;
+
+  .mobile-menu.is-open & {
+    opacity: 1;
+    transition: opacity 700ms ease-out calc(650ms + var(--item-delay, 0ms));
+  }
+}
+
+.mobile-menu-line {
+  scale: 0 1;
+  transform-origin: left;
+  transition: scale 400ms $ease-in;
+
+  .mobile-menu.is-open & {
+    scale: 1 1;
+    transition: scale 1000ms $ease-in-out calc(450ms + var(--item-delay, 0ms));
+  }
+}
+
+// Cursor over projects: a light circle grows over the ring.
+.view-cursor {
+  scale: 0;
+  transition: scale 500ms $ease-out;
+
+  [data-active] > & {
+    scale: 1;
+  }
+}

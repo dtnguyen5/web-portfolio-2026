@@ -1,69 +1,24 @@
 "use client";
 
 import Image from "next/image";
-import {
-  CSSProperties,
-  FormEvent,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import { contact, experience, tools } from "@/data/portfolio";
+import { FormEvent, useEffect, useRef, useState } from "react";
+import { experience, tools } from "@/data/portfolio";
 import Arrow from "./Arrow";
+import BlockReveal from "./BlockReveal";
 import ProjectList from "./ProjectList";
 import SectionLabel from "./SectionLabel";
 import ServiceList from "./ServiceList";
+import { contentPadding, fillHoverClass } from "./shared";
+import SiteFooter from "./SiteFooter";
+import SiteNav from "./SiteNav";
 import SmoothCursor from "./SmoothCursor";
 import SmoothScroll from "./SmoothScroll";
 
-const contentPadding = "px-6 sm:px-[5.56vw]";
 const buttonClass =
   "inline-flex h-13 items-center gap-6 rounded-full bg-[#f1f0ec] px-6 text-base font-medium text-[#080808]";
-// Hover fill that rises from the bottom; add the fill colour with `before:bg-*`.
-const fillHoverClass =
-  "relative isolate overflow-hidden transition-colors duration-600 ease-[cubic-bezier(0.33,1,0.68,1)] before:absolute before:inset-x-0 before:-bottom-1/4 before:-z-10 before:h-[150%] before:translate-y-full before:rounded-[50%_50%_0_0] before:transition-[translate,border-radius] before:duration-600 before:ease-[cubic-bezier(0.33,1,0.68,1)] hover:before:translate-y-0 hover:before:rounded-none focus-visible:before:translate-y-0 focus-visible:before:rounded-none";
-const socialLinks = [
-  {
-    label: "Instagram",
-    href: "https://www.instagram.com/dtnguyen5_/",
-    icon: (
-      <>
-        <rect x="2" y="2" width="20" height="20" rx="5" />
-        <circle cx="12" cy="12" r="4" />
-        <path d="M17.5 6.5h.01" />
-      </>
-    ),
-  },
-  {
-    label: "LinkedIn",
-    href: "https://www.linkedin.com/in/duy-tiep-nguyen-7325002a3/",
-    icon: (
-      <>
-        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z" />
-        <rect x="2" y="9" width="4" height="12" />
-        <circle cx="4" cy="4" r="2" />
-      </>
-    ),
-  },
-  {
-    label: "GitHub",
-    href: "https://github.com/dtnguyen5",
-    icon: (
-      <>
-        <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.4 5.4 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
-        <path d="M9 18c-4.51 2-5-2-7-2" />
-      </>
-    ),
-  },
-];
-const navLinkClass =
-  "transition-colors duration-500 ease-in-out hover:text-[#a5a5a2]";
 
 const Portfolio = () => {
   const [sent, setSent] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [navCompact, setNavCompact] = useState(false);
-  const [navActive, setNavActive] = useState(false);
   const heroTitleRef = useRef<HTMLDivElement>(null);
   const heroInfoRef = useRef<HTMLDivElement>(null);
   const projectsSectionRef = useRef<HTMLElement>(null);
@@ -113,63 +68,6 @@ const Portfolio = () => {
     return () => {
       sectionObserver.disconnect();
       window.removeEventListener("scroll", revealSectionsOnScroll);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (
-      !("IntersectionObserver" in window) ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
-      return;
-    }
-
-    // Content blocks below the hero slide in as they scroll into view.
-    // The projects section is left out, its stacking cards animate on their own.
-    const revealBlocks = [
-      ...document.querySelectorAll<HTMLElement>(
-        [
-          "#o-mne > .font-mono",
-          "#o-mne .about-sidebar",
-          "#o-mne .about-content > article",
-          "#o-mne article > .mt-8:has(> h3)",
-          "#o-mne article > .mt-8 > .border-t",
-          "#sluzby > div:first-child",
-          "#sluzby .service-row",
-          "#kontakt > .font-mono",
-          "#kontakt > div:last-child > *",
-          "main > footer > *",
-        ].join(", "),
-      ),
-    ];
-
-    revealBlocks.forEach((item) => item.classList.add("block-reveal"));
-
-    const reveal: IntersectionObserverCallback = (entries, observer) => {
-      entries
-        .filter((entry) => entry.isIntersecting)
-        .forEach((entry, index) => {
-          const item = entry.target as HTMLElement;
-          item.style.setProperty("--reveal-delay", `${Math.min(index, 4) * 140}ms`);
-          item.classList.add("is-visible");
-          observer.unobserve(item);
-        });
-    };
-    const observer = new IntersectionObserver(reveal, {
-      rootMargin: "0px 0px -10% 0px",
-    });
-    // The footer ends the page, so its last rows can never scroll above the
-    // bottom margin used for the other blocks.
-    const footerObserver = new IntersectionObserver(reveal);
-
-    revealBlocks.forEach((item) =>
-      (item.closest("footer") ? footerObserver : observer).observe(item),
-    );
-
-    return () => {
-      observer.disconnect();
-      footerObserver.disconnect();
-      revealBlocks.forEach((item) => item.classList.remove("block-reveal", "is-visible"));
     };
   }, []);
 
@@ -359,74 +257,6 @@ const Portfolio = () => {
     };
   }, []);
 
-  useEffect(() => {
-    let frame = 0;
-    let lastY = window.scrollY;
-
-    // The desktop nav shrinks to the logo and button while scrolling down and
-    // opens again on scrolling up or near the top of the page.
-    const update = () => {
-      frame = 0;
-      const y = window.scrollY;
-      const delta = y - lastY;
-
-      if (y < 120) {
-        setNavCompact(false);
-      } else if (delta > 4) {
-        setNavCompact(true);
-      } else if (delta < -4) {
-        setNavCompact(false);
-      }
-
-      if (Math.abs(delta) > 4) {
-        lastY = y;
-      }
-    };
-
-    const requestUpdate = () => {
-      if (!frame) {
-        frame = requestAnimationFrame(update);
-      }
-    };
-
-    window.addEventListener("scroll", requestUpdate, { passive: true });
-
-    return () => {
-      cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", requestUpdate);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!menuOpen) {
-      return;
-    }
-
-    // The page underneath must not scroll while the mobile menu is open.
-    const root = document.documentElement;
-    const closeOnEscape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setMenuOpen(false);
-      }
-    };
-    const closeOnDesktop = (event: MediaQueryListEvent) => {
-      if (event.matches) {
-        setMenuOpen(false);
-      }
-    };
-    const desktopQuery = window.matchMedia("(min-width: 40rem)");
-
-    root.style.overflow = "hidden";
-    window.addEventListener("keydown", closeOnEscape);
-    desktopQuery.addEventListener("change", closeOnDesktop);
-
-    return () => {
-      root.style.overflow = "";
-      window.removeEventListener("keydown", closeOnEscape);
-      desktopQuery.removeEventListener("change", closeOnDesktop);
-    };
-  }, [menuOpen]);
-
   const submitForm = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setSent(true);
@@ -436,193 +266,24 @@ const Portfolio = () => {
     <>
       <SmoothCursor />
       <SmoothScroll />
+      {/* Content blocks below the hero slide in as they scroll into view.
+          The projects section is left out, its stacking cards animate on their own. */}
+      <BlockReveal
+        selectors={[
+          "#o-mne > .font-mono",
+          "#o-mne .about-sidebar",
+          "#o-mne .about-content > article",
+          "#o-mne article > .mt-8:has(> h3)",
+          "#o-mne article > .mt-8 > .border-t",
+          "#sluzby > div:first-child",
+          "#sluzby .service-row",
+          "#kontakt > .font-mono",
+          "#kontakt > div:last-child > *",
+          "main > footer > *",
+        ]}
+      />
       <main className="overflow-x-clip">
-        <nav className="hero-reveal fixed inset-x-0 top-0 z-70 flex items-center justify-between bg-[#080808]/80 px-6 py-4 backdrop-blur-md sm:top-8 sm:h-19 sm:justify-center sm:bg-transparent sm:px-[5.56vw] sm:py-0 sm:backdrop-blur-none">
-          <a
-            className="sm:hidden"
-            href="#domu"
-            aria-label="Domů"
-            onClick={() => setMenuOpen(false)}
-          >
-            <Image
-              src="/Osobní značka.svg"
-              alt="Honza"
-              width={34}
-              height={34}
-            />
-          </a>
-          {/* While compact only the logo and button show; hovering or
-              focusing the pill opens the links again. */}
-          <div
-            className={`hidden items-center gap-4 rounded-full border border-[#1f1f1f] bg-[#080808] py-2.5 text-base font-medium text-[#f1f0ec] transition-[padding] duration-600 ease-[cubic-bezier(0.65,0,0.35,1)] sm:flex ${
-              navCompact && !navActive ? "pl-6 pr-2.5" : "pl-9 pr-6"
-            }`}
-            onMouseEnter={() => setNavActive(true)}
-            onMouseLeave={() => setNavActive(false)}
-            onFocus={() => setNavActive(true)}
-            onBlur={(event) => {
-              if (!event.currentTarget.contains(event.relatedTarget)) {
-                setNavActive(false);
-              }
-            }}
-          >
-            <a href="#domu" aria-label="Domů">
-              <Image
-                src="/Osobní značka.svg"
-                alt="Honza"
-                width={30}
-                height={30}
-              />
-            </a>
-            <div
-              className={`grid transition-[grid-template-columns,opacity] duration-600 ease-[cubic-bezier(0.65,0,0.35,1)] ${
-                navCompact && !navActive
-                  ? "grid-cols-[0fr] opacity-0"
-                  : "grid-cols-[1fr] opacity-100"
-              }`}
-            >
-              <div className="overflow-hidden">
-                <div className="flex items-center gap-7 whitespace-nowrap px-3">
-                  <a className={navLinkClass} href="#domu">
-                    Domů
-                  </a>
-                  <a className={navLinkClass} href="#o-mne">
-                    O mně
-                  </a>
-                  <a className={navLinkClass} href="#sluzby">
-                    Služby
-                  </a>
-                  <a className={navLinkClass} href="#projekty">
-                    Projekty
-                  </a>
-                </div>
-              </div>
-            </div>
-            {navCompact && !navActive ? (
-              <span className="flex items-center gap-3 whitespace-nowrap py-2.5 pr-3">
-                <span
-                  className="h-1.5 w-1.5 rounded-full bg-[#f1f0ec]"
-                  aria-hidden="true"
-                />
-                Právě k dispozici
-              </span>
-            ) : (
-              <a
-                className={`${fillHoverClass} whitespace-nowrap rounded-full bg-[#1f1f1f] px-5 py-2.5 before:bg-[#f1f0ec] hover:text-[#080808] focus-visible:text-[#080808]`}
-                href="#kontakt"
-              >
-                Napište mi
-              </a>
-            )}
-          </div>
-          <button
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-[#f5f2e9] sm:hidden"
-            type="button"
-            onClick={() => setMenuOpen((isOpen) => !isOpen)}
-            aria-label={menuOpen ? "Zavřít menu" : "Otevřít menu"}
-            aria-expanded={menuOpen}
-            aria-controls="mobile-menu"
-          >
-            {/* The two lines turn into a cross while the menu is open. */}
-            <span className="relative h-1.75 w-5.5" aria-hidden="true">
-              <span
-                className={`absolute inset-x-0 top-0 h-px bg-[#f5f2e9] transition-[translate,rotate] duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] ${
-                  menuOpen ? "translate-y-0.75 rotate-45" : ""
-                }`}
-              />
-              <span
-                className={`absolute inset-x-0 bottom-0 h-px bg-[#f5f2e9] transition-[translate,rotate] duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] ${
-                  menuOpen ? "-translate-y-0.75 -rotate-45" : ""
-                }`}
-              />
-            </span>
-          </button>
-        </nav>
-        {/* The panel grows as a circle out of the burger button, then the
-            links rise from behind a mask like the hero headline. */}
-        <div
-          className={`mobile-menu fixed inset-0 z-60 flex flex-col overflow-y-auto bg-[#080808] px-6 pb-10 pt-4 sm:hidden ${
-            menuOpen ? "is-open" : ""
-          }`}
-          id="mobile-menu"
-          inert={!menuOpen}
-          data-lenis-prevent
-        >
-          {/* Space for the fixed nav bar, whose logo and button stay on top of the menu. */}
-          <div className="h-11 shrink-0" aria-hidden="true" />
-          <nav className="mt-16 flex flex-col">
-            {[
-              ["Domů", "#domu"],
-              ["O mně", "#o-mne"],
-              ["Služby", "#sluzby"],
-              ["Projekty", "#projekty"],
-              ["Napište mi", "#kontakt"],
-            ].map(([label, href], index) => (
-              <a
-                className="mobile-menu-link group relative flex items-center justify-between py-5 text-[1.75rem] font-medium tracking-[-.04em] text-[#f1f0ec]"
-                href={href}
-                key={href}
-                onClick={() => setMenuOpen(false)}
-                style={{ "--item-delay": `${index * 90}ms` } as CSSProperties}
-              >
-                <span className="overflow-hidden">
-                  <span className="mobile-menu-reveal block">
-                    <span className="block transition-[color,translate] duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover:translate-x-2 group-hover:text-[#a5a5a2] group-active:text-[#a5a5a2]">
-                      {label}
-                    </span>
-                  </span>
-                </span>
-                <span className="mobile-menu-fade">
-                  <Arrow
-                    className="brightness-0 invert transition-[rotate] duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover:rotate-45 group-active:rotate-45"
-                    size={18}
-                  />
-                </span>
-                <span
-                  aria-hidden="true"
-                  className="mobile-menu-line absolute inset-x-0 bottom-0 h-px bg-[#30302e]"
-                />
-              </a>
-            ))}
-          </nav>
-          <div
-            className="mobile-menu-fade mt-10 flex flex-col gap-3"
-            style={{ "--item-delay": "450ms" } as CSSProperties}
-          >
-            <a className="text-lg text-[#f1f0ec] transition-colors duration-500 hover:text-[#a5a5a2]" href={`tel:${contact.phone.replace(/\s/g, "")}`}>
-              {contact.phone}
-            </a>
-            <a className="text-sm text-[#a5a5a2] transition-colors duration-500 hover:text-[#f1f0ec]" href={`mailto:${contact.email}`}>
-              {contact.email}
-            </a>
-            <div className="mt-6 flex gap-3 text-[#f1f0ec]">
-              {socialLinks.map(({ label, href, icon }) => (
-                <a
-                  aria-label={label}
-                  className={`${fillHoverClass} flex h-11 w-11 items-center justify-center rounded-full border before:bg-[#f1f0ec] hover:text-[#080808] focus-visible:text-[#080808]`}
-                  href={href}
-                  key={label}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                >
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    aria-hidden="true"
-                  >
-                    {icon}
-                  </svg>
-                </a>
-              ))}
-            </div>
-          </div>
-        </div>
+        <SiteNav />
       <section
         className={`scroll-stack-section scroll-stack-section-01 ${contentPadding} bg-[#080808] pb-0 pt-14 sm:pt-22`}
         id="domu"
@@ -967,40 +628,7 @@ const Portfolio = () => {
         </div>
       </section>
 
-      <footer className={`scroll-reveal-section scroll-stack-section-07 ${contentPadding} bg-[#080808] pb-9 pt-16 sm:pt-22`}>
-        <SectionLabel>PŘIPRAVENÝ TVOŘIT NĚCO NOVÉHO</SectionLabel>
-        <div className="my-10 flex items-center justify-between sm:my-14">
-          <h2 className="m-0 text-[3.3125rem] tracking-[-.08em] sm:text-[9vw]">
-            POJĎME TVOŘIT
-          </h2>
-        </div>
-        <div className="h-px bg-[#30302e]" />
-        <div className="flex flex-col gap-3 whitespace-nowrap py-7 text-xl sm:flex-row sm:flex-wrap sm:justify-between sm:gap-x-10 sm:py-10 sm:text-3xl lg:text-[2.75rem]">
-          <a href={`mailto:${contact.email}`}>{contact.email}</a>
-          <a href={`tel:${contact.phone.replace(/\s/g, "")}`}>
-            {contact.phone}
-          </a>
-        </div>
-        <div className="h-px bg-[#30302e]" />
-        <div className="grid gap-5 pt-6 font-mono text-[0.625rem] text-[#a5a5a2] sm:flex sm:items-center sm:justify-between">
-          <span>©2026 HONZA</span>
-          <div className="order-3 flex justify-between gap-2 text-[#f1f0ec] sm:order-none sm:gap-7">
-            {socialLinks.map(({ label, href }) => (
-              <a
-                className="flex items-center gap-1.5"
-                href={href}
-                key={label}
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                {label.toUpperCase()}{" "}
-                <Arrow className="brightness-0 invert" size={12} />
-              </a>
-            ))}
-          </div>
-          <span>DESIGNED &amp; DEVELOPED BY ME</span>
-        </div>
-      </footer>
+      <SiteFooter />
       </main>
     </>
   );
