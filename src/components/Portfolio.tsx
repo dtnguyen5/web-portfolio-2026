@@ -533,12 +533,14 @@ const Portfolio = () => {
               Máte nápad, projekt nebo jen otázku? Ozvěte se mi a společně
               vymyslíme další krok.
             </p>
-            <div className="relative h-[21.25rem] overflow-hidden rounded-2xl sm:h-120 lg:h-180">
+            <div className="relative h-[21.25rem] overflow-hidden rounded-2xl sm:h-108 lg:h-150">
               <Image
                 className="object-cover"
-                src="/workspace-detail.png"
-                alt="Detail pracovního prostoru"
+                src="/kontakt.png"
+                alt="Ruka píšící na klávesnici notebooku s otevřeným e-mailem"
                 fill
+                // The dark photo with text on the screen blurs at the default quality.
+                quality={90}
                 sizes="(max-width: 700px) 342px, 480px"
               />
             </div>
