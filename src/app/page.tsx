@@ -7,7 +7,7 @@ import Portfolio from "@/components/Portfolio";
 const laptopOrder = [
   // Websites
   "Luxusní automobilové leštění v černobílém stylu.png",
-  "sluchatka.jpg",
+  "boty.jpg",
   // Posters
   "Mercedes.jpg",
   "jidlo.jpg",

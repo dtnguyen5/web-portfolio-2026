@@ -29,7 +29,7 @@ type ScreenMesh = THREE.Mesh<THREE.BufferGeometry, THREE.MeshBasicMaterial>;
 
 // Each design stays on the screen for a few seconds, then the next one fades
 // in over it.
-const SCREEN_DURATION = 4;
+const SCREEN_DURATION = 5;
 const FADE_DURATION = 1.2;
 
 // Images rarely match the screen's proportions. An image whose edges along
@@ -63,10 +63,16 @@ const flatEdgeColor = (image: CanvasImageSource, wide: boolean) => {
   return matching.length >= pixels.length * 0.9 ? `rgb(${color.map(Math.round).join(",")})` : null;
 };
 
-const fitToScreen = (image: HTMLImageElement, screenAspect: number) => {
+// The screen texture keeps the design's own resolution (within these limits),
+// so a sharp, large export stays sharp and a small one isn't resampled twice.
+const MIN_TEXTURE_WIDTH = 1024;
+const MAX_TEXTURE_WIDTH = 4096;
+
+const fitToScreen = (image: HTMLImageElement, screenAspect: number, maxTextureSize: number) => {
   const canvas = document.createElement("canvas");
-  canvas.width = 2048;
-  canvas.height = Math.round(2048 / screenAspect);
+  const limit = Math.min(MAX_TEXTURE_WIDTH, maxTextureSize, Math.floor(maxTextureSize * screenAspect));
+  canvas.width = Math.min(Math.max(image.width, MIN_TEXTURE_WIDTH), limit);
+  canvas.height = Math.round(canvas.width / screenAspect);
   const context = canvas.getContext("2d")!;
   context.imageSmoothingQuality = "high";
   const imageAspect = image.width / image.height;
@@ -113,11 +119,14 @@ const fitToScreen = (image: HTMLImageElement, screenAspect: number) => {
   return texture;
 };
 
-const Laptop = ({ screens, onReady }: Omit<LaptopSceneProps, "running">) => {
+// One clock for the screen and the camera, so each new design arrives with a
+// new camera shot. It only runs once the model is loaded.
+type ShowClock = { current: number };
+
+const Laptop = ({ clockRef, screens, onReady }: Omit<LaptopSceneProps, "running"> & { clockRef: ShowClock }) => {
   const textures = useLoader(THREE.TextureLoader, screens);
   const { scene } = useGLTF(MODEL);
   const gl = useThree((state) => state.gl);
-  const screen = useRef({ index: 0, previous: 0, time: FADE_DURATION });
   const screenLayers = useRef<ScreenMesh[]>([]);
   // The display gets one layer per design, on the same geometry as the model's screen.
   const { model, layers } = useMemo(() => {
@@ -156,7 +165,7 @@ const Laptop = ({ screens, onReady }: Omit<LaptopSceneProps, "running">) => {
         display!.geometry,
         new THREE.MeshBasicMaterial({
           depthWrite: false,
-          map: fitToScreen(texture.image as HTMLImageElement, screenAspect),
+          map: fitToScreen(texture.image as HTMLImageElement, screenAspect, gl.capabilities.maxTextureSize),
           opacity: index === 0 ? 1 : 0,
           toneMapped: false,
           transparent: true,
@@ -170,7 +179,7 @@ const Laptop = ({ screens, onReady }: Omit<LaptopSceneProps, "running">) => {
     });
 
     return { model, layers };
-  }, [scene, textures]);
+  }, [gl, scene, textures]);
 
   useLayoutEffect(() => {
     layers.forEach((layer) => {
@@ -184,26 +193,26 @@ const Laptop = ({ screens, onReady }: Omit<LaptopSceneProps, "running">) => {
   }, [onReady]);
 
   useFrame((_, delta) => {
-    screen.current.time += delta;
-    if (screen.current.time > SCREEN_DURATION && screens.length > 1) {
-      const { index } = screen.current;
-      screen.current = { index: (index + 1) % screens.length, previous: index, time: 0 };
+    clockRef.current += delta;
+    const layers = screenLayers.current;
+    if (!layers.length) {
+      return;
     }
 
+    const block = Math.floor(clockRef.current / SCREEN_DURATION);
+    const current = block % layers.length;
+    const previous = (block + layers.length - 1) % layers.length;
     // The next design fades in on top of the previous one, which stays fully
     // visible underneath until the fade is done.
-    const { index: current, previous } = screen.current;
-    const layers = screenLayers.current;
-    const incoming = layers[current];
-    const fade = clamp01(screen.current.time / FADE_DURATION);
-    if (incoming) {
-      incoming.material.opacity = smooth(fade);
-      incoming.renderOrder = 2;
-    }
+    const fade =
+      block === 0 || layers.length === 1 ? 1 : clamp01((clockRef.current - block * SCREEN_DURATION) / FADE_DURATION);
     const fadedIn = fade >= 1;
 
     layers.forEach((layer, index) => {
-      if (index !== current) {
+      if (index === current) {
+        layer.material.opacity = smooth(fade);
+        layer.renderOrder = 2;
+      } else {
         layer.material.opacity = index === previous && !fadedIn ? 1 : 0;
         layer.renderOrder = index === previous ? 1 : 0;
       }
@@ -213,37 +222,89 @@ const Laptop = ({ screens, onReady }: Omit<LaptopSceneProps, "running">) => {
   return <primitive object={model} scale={SCALE} />;
 };
 
-// The camera never stops: it drifts around the laptop on slow, overlapping
-// waves (side to side, up and down, closer and further), so the motion is
-// continuous and never repeats exactly.
-const TAU = Math.PI * 2;
-const wave = (time: number, period: number, phase = 0) => Math.sin((time / period) * TAU + phase);
+// The camera works like a film crew rather than a turntable: every design
+// gets its own shot (a wide establishing view, a close-up on the screen, a low
+// side angle, a three-quarter view...). Within a shot the camera dollies slowly;
+// when the design changes it glides to the next shot. Every position is in
+// front of the laptop, so a glide never passes through it.
+type Vec3 = [number, number, number];
+type Shot = { from: Vec3; to: Vec3; target: Vec3; targetTo: Vec3; fov: number };
 
-const CameraRig = () => {
-  const { camera, size } = useThree();
-  const time = useRef(0);
+const SHOTS: Shot[] = [
+  // Establishing three-quarter view from the left.
+  { from: [-3.4, 2.3, 5.6], to: [-2.8, 2.0, 5.0], target: [0, 0.7, -0.5], targetTo: [0, 0.75, -0.5], fov: 35 },
+  // Close-up: the design fills the frame.
+  { from: [0.35, 1.05, 3.9], to: [-0.15, 0.95, 3.3], target: [0, 0.85, -0.6], targetTo: [0, 0.85, -0.6], fov: 32 },
+  // Low angle from the right, rising slowly.
+  { from: [4.4, 0.55, 3.6], to: [3.6, 0.8, 4.2], target: [-0.2, 0.7, -0.4], targetTo: [0, 0.7, -0.4], fov: 35 },
+  // Three-quarter view from the right, a little above the screen.
+  { from: [2.7, 2.1, 4.7], to: [2.1, 1.8, 4.1], target: [0, 0.8, -0.5], targetTo: [0, 0.8, -0.5], fov: 33 },
+  // Grazing close view along the screen from the left.
+  { from: [-3.0, 0.9, 2.4], to: [-2.5, 1.1, 2.9], target: [0.3, 0.85, -0.6], targetTo: [0.3, 0.85, -0.6], fov: 30 },
+  // Wide, straight-on, slowly pushing in.
+  { from: [0, 2.4, 7.4], to: [0, 2.0, 6.6], target: [0, 0.6, -0.4], targetTo: [0, 0.6, -0.4], fov: 35 },
+];
+
+// How long the camera takes to glide from one shot to the next.
+const SHOT_TRANSITION = 2.2;
+const easeInOut = (value: number) => (value < 0.5 ? 4 * value ** 3 : 1 - (-2 * value + 2) ** 3 / 2);
+
+const CameraRig = ({ clockRef }: { clockRef: ShowClock }) => {
+  const size = useThree((state) => state.size);
   const still = useMemo(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches, []);
-  const target = useMemo(() => new THREE.Vector3(), []);
+  const vectors = useRef({
+    position: new THREE.Vector3(),
+    target: new THREE.Vector3(),
+    previousPosition: new THREE.Vector3(),
+    previousTarget: new THREE.Vector3(),
+    end: new THREE.Vector3(),
+    parallax: new THREE.Vector2(),
+  });
 
-  useFrame((_, delta) => {
-    if (!still) {
-      time.current += delta;
+  // Where shot `index` has the camera `time` seconds after it started. A shot
+  // keeps moving through the glide out of it, so nothing ever stops dead.
+  const pose = (v: typeof vectors.current, index: number, time: number, position: THREE.Vector3, target: THREE.Vector3) => {
+    const shot = SHOTS[((index % SHOTS.length) + SHOTS.length) % SHOTS.length];
+    const progress = clamp01(time / (SCREEN_DURATION + SHOT_TRANSITION));
+    position.set(...shot.from).lerp(v.end.set(...shot.to), progress);
+    target.set(...shot.target).lerp(v.end.set(...shot.targetTo), progress);
+    return shot.fov;
+  };
+
+  useFrame((state, delta) => {
+    const v = vectors.current;
+    const { camera } = state;
+    // With reduced motion the camera holds the first shot.
+    const time = still ? 0 : clockRef.current;
+    const block = Math.floor(time / SCREEN_DURATION);
+    const local = time - block * SCREEN_DURATION;
+    let fov = pose(v, block, local, v.position, v.target);
+
+    if (block > 0 && local < SHOT_TRANSITION) {
+      const previousFov = pose(v, block - 1, local + SCREEN_DURATION, v.previousPosition, v.previousTarget);
+      const blend = easeInOut(local / SHOT_TRANSITION);
+      v.position.lerpVectors(v.previousPosition, v.position, blend);
+      v.target.lerpVectors(v.previousTarget, v.target, blend);
+      fov = previousFov + (fov - previousFov) * blend;
     }
-    const t = time.current;
 
-    const azimuth = -0.35 + 0.5 * wave(t, 24);
-    const elevation = 0.42 + 0.14 * wave(t, 17, 1.3);
     // Narrow (portrait) screens pull the camera back to keep the laptop in view.
     const zoom = Math.max(1, 1.25 / (size.width / size.height));
-    const distance = (6.4 + 1.1 * wave(t, 19, 2.1)) * zoom;
-    target.set(0.1 * wave(t, 21, 0.7), 0.75 + 0.12 * wave(t, 15, 2.6), -0.55);
+    v.position.sub(v.target).multiplyScalar(zoom).add(v.target);
 
-    camera.position.set(
-      target.x + distance * Math.sin(azimuth) * Math.cos(elevation),
-      target.y + distance * Math.sin(elevation),
-      target.z + distance * Math.cos(azimuth) * Math.cos(elevation),
-    );
-    camera.lookAt(target);
+    // The camera leans a little towards the pointer.
+    if (!still) {
+      v.parallax.lerp(state.pointer, 1 - Math.exp(-delta * 2));
+      v.position.x += v.parallax.x * 0.3;
+      v.position.y += v.parallax.y * 0.15;
+    }
+
+    camera.position.copy(v.position);
+    camera.lookAt(v.target);
+    if (camera instanceof THREE.PerspectiveCamera && camera.fov !== fov) {
+      camera.fov = fov;
+      camera.updateProjectionMatrix();
+    }
   });
 
   return null;
@@ -251,11 +312,12 @@ const CameraRig = () => {
 
 // Sharpness (device pixel ratio) the scene starts with, and the lowest it
 // drops to on a device that can't keep up.
-const MAX_DPR = 1.5;
+const MAX_DPR = 2;
 const MIN_DPR = 1;
 
 const LaptopScene = ({ screens, running, onReady }: LaptopSceneProps) => {
   const [dpr, setDpr] = useState(() => Math.min(window.devicePixelRatio, MAX_DPR));
+  const clockRef = useRef(0);
 
   return (
     <Canvas
@@ -279,9 +341,9 @@ const LaptopScene = ({ screens, running, onReady }: LaptopSceneProps) => {
         <Lightformer form="rect" intensity={2.2} position={[-6, 2, 1]} rotation-y={Math.PI / 2} scale={[6, 2, 1]} />
         <Lightformer form="rect" intensity={1.6} position={[6, 1, 2]} rotation-y={-Math.PI / 2} scale={[6, 1.5, 1]} />
       </Environment>
-      <CameraRig />
+      <CameraRig clockRef={clockRef} />
       <Suspense fallback={null}>
-        <Laptop onReady={onReady} screens={screens} />
+        <Laptop clockRef={clockRef} onReady={onReady} screens={screens} />
       </Suspense>
     </Canvas>
   );
