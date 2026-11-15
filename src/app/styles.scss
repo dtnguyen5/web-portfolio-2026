@@ -322,11 +322,18 @@ $projects-heading-height: var(--projects-heading-height, 9rem);
   display: flex;
   flex-direction: column;
 
-  // Phones keep each card at its natural height (16:10 preview), larger screens
-  // stretch it to fill the space below the sticky heading.
+  // Phones and upright tablets keep each card at its natural height (the
+  // whole image). Landscape screens stretch it to fill the space below the
+  // sticky heading, but never past the height that shows the whole image
+  // (6rem header, 2px border, content width / image ratio).
   @include up(sm) {
-    height: calc(100svh - #{$projects-heading-height} - 1rem);
-    min-height: 18rem;
+    @media (orientation: landscape) {
+      height: min(
+        calc(100svh - #{$projects-heading-height} - 1rem),
+        calc(6rem + 2px + 88.88vw / (var(--image-ratio, 1.6)))
+      );
+      min-height: 18rem;
+    }
   }
 }
 

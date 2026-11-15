@@ -358,13 +358,15 @@ const Portfolio = () => {
               <h2 className="my-5 text-4xl leading-tight tracking-[-.05em] sm:text-[3.25rem]">
                 Kdo jsem
               </h2>
-              <p className="m-0 max-w-[60.625rem] text-lg leading-[1.55] text-[#a5a5a2]">
-                Jmenuji se Nguyen Duy Tiep (Honza) a jsem webový designér a
-                developer z Plzně. Pomáhám klientům převádět jejich nápady do
-                funkčních a moderních webových řešení. Zakládám si na detailu,
-                čisté typografii a responzivním designu. Spojuji kreativitu
-                designéra s logikou vývojáře, abych doručil komplexní a
-                bezproblémový výsledek.
+              <p className="m-0 max-w-[60.625rem] text-lg sm:text-justify leading-[1.55] text-[#a5a5a2]">
+                Jmenuji se Nguyen Duy Tiep (Honza), působím v Plzni a věnuji se
+                webdesignu, vývoji webů i grafice. Pomáhám klientům převádět jejich nápady do funkčních a
+                moderních řešení, ať už jde o web, logo, vizitky nebo plakát.
+                Zakládám si na detailu, čisté typografii a
+                promyšleném designu. Spojuji kreativitu designéra s logikou
+                vývojáře, abych doručil ucelený výsledek. Ke každému projektu
+                přistupuji individuálně a hledám řešení, které nebude jen
+                hezké, ale bude i dobře fungovat.
               </p>
             </article>
             <article className="border-t border-[#30302e] py-6 !pb-0 sm:pt-10">
@@ -449,7 +451,7 @@ const Portfolio = () => {
           <div className="projects-heading-label">
             <SectionLabel>PROJEKTY</SectionLabel>
           </div>
-          <h2 className="projects-heading-title m-0 mt-9 whitespace-nowrap text-[clamp(2rem,9vw,2.6875rem)] leading-tight tracking-[-.06em] sm:mt-11 sm:text-[5.5rem]">
+          <h2 className="projects-heading-title m-0 mt-9 whitespace-nowrap text-[clamp(2rem,9vw,2.6875rem)] leading-tight tracking-[-.06em] sm:mt-11 sm:text-[min(5.5rem,9.5vw)]">
             Zpracované projekty
           </h2>
         </div>

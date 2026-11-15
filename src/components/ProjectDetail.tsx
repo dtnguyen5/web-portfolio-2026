@@ -38,20 +38,20 @@ const ProjectDetail = ({ project }: ProjectDetailProps) => {
       </header>
 
       <dl
-        className="hero-reveal m-0 mt-14 grid grid-cols-2 gap-x-6 gap-y-8 text-center sm:mt-20 sm:grid-flow-col sm:auto-cols-fr sm:grid-cols-none [&>:last-child:nth-child(odd)]:col-span-2 sm:[&>:last-child:nth-child(odd)]:col-span-1"
+        className="hero-reveal m-0 mt-14 grid auto-cols-fr grid-flow-col gap-x-4 text-center sm:mt-20 sm:gap-x-6"
         style={revealDelay(200)}
       >
         {detail.facts.map(({ label, value }) => (
           <div key={label}>
-            <dt className="text-lg font-medium">{label}</dt>
-            <dd className="m-0 mt-2 text-[#a5a5a2]">{value}</dd>
+            <dt className="text-base font-medium sm:text-lg">{label}</dt>
+            <dd className="m-0 mt-2 text-sm text-[#a5a5a2] sm:text-base">{value}</dd>
           </div>
         ))}
       </dl>
 
       <div
-        className="hero-reveal relative mt-14 aspect-16/10 overflow-hidden rounded-2xl bg-[#191919] sm:mt-20 sm:aspect-video"
-        style={revealDelay(400)}
+        className="hero-reveal relative mt-14 overflow-hidden rounded-2xl bg-[#191919] sm:mt-20"
+        style={{ ...revealDelay(400), aspectRatio: project.imageRatio }}
       >
         <Image
           className="object-cover"

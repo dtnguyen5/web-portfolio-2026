@@ -19,6 +19,8 @@ export type Project = {
   name: string;
   type: string;
   image: string;
+  // Aspect ratio of the image (width / height), so it can show uncropped.
+  imageRatio: string;
   mark: string;
   detail?: ProjectDetail;
 };
@@ -68,6 +70,7 @@ export const projects: Project[] = [
     name: "ZadyFit",
     type: "Web design",
     image: "/jakub.png",
+    imageRatio: "2532/1188",
     mark: "ZadyFit",
     detail: {
       description:
@@ -109,6 +112,7 @@ export const projects: Project[] = [
     name: "Florise",
     type: "Web design",
     image: "/01 Hero (video background 20 s).png",
+    imageRatio: "1440/900",
     mark: "Florise",
     detail: {
       description:
@@ -148,8 +152,9 @@ export const projects: Project[] = [
   {
     slug: "smrk-studio",
     name: "SMRK studio",
-    type: "Brand / grafika",
+    type: "Grafický design",
     image: "/Vizitky.png",
+    imageRatio: "2690/1300",
     mark: "SMRK",
     detail: {
       description:
@@ -157,7 +162,7 @@ export const projects: Project[] = [
       facts: [
         { label: "Klient", value: "SMRK studio" },
         { label: "Odvětví", value: "Vizitky" },
-        { label: "Služba", value: "Brand / grafika" },
+        { label: "Služba", value: "Grafický design" },
       ],
       sections: [
         {
