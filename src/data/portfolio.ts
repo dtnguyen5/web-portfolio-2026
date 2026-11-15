@@ -21,6 +21,9 @@ export type Project = {
   image: string;
   // Aspect ratio of the image (width / height), so it can show uncropped.
   imageRatio: string;
+  // Images on a plain background (not website screenshots) are never
+  // cropped; the background fills the free space around them.
+  imageContain?: boolean;
   mark: string;
   detail?: ProjectDetail;
 };
@@ -155,6 +158,7 @@ export const projects: Project[] = [
     type: "Grafický design",
     image: "/Vizitky.png",
     imageRatio: "2690/1300",
+    imageContain: true,
     mark: "SMRK",
     detail: {
       description:

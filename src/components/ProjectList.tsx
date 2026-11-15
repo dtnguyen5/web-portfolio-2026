@@ -30,10 +30,14 @@ const ProjectList = () => (
             </em>
           </div>
           {/* Phones and upright tablets show the whole image, landscape screens fill the tall card. */}
-          <div className="project-image relative aspect-(--image-ratio) bg-[#080808] sm:landscape:aspect-auto sm:landscape:min-h-0 sm:landscape:flex-1">
-            {/* Cropped from the bottom: the screenshots carry their nav and logo at the top. */}
+          <div
+            className={`project-image relative aspect-(--image-ratio) sm:landscape:aspect-auto sm:landscape:min-h-0 sm:landscape:flex-1 ${
+              project.imageContain ? "bg-black" : "bg-[#080808]"
+            }`}
+          >
+            {/* Screenshots are cropped from the bottom, they carry their nav and logo at the top. */}
             <Image
-              className="object-cover object-top"
+              className={project.imageContain ? "object-contain" : "object-cover object-top"}
               src={project.image}
               alt={`${project.name} – ukázka projektu`}
               fill

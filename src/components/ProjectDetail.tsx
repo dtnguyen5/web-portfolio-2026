@@ -142,10 +142,14 @@ const ProjectDetail = ({ project }: ProjectDetailProps) => {
                 href={`/projekty/${item.slug}`}
                 key={item.slug}
               >
-                <div className="relative aspect-video overflow-hidden rounded-2xl bg-[#191919]">
+                <div
+                  className={`relative aspect-video overflow-hidden rounded-2xl ${
+                    item.imageContain ? "bg-black" : "bg-[#191919]"
+                  }`}
+                >
                   {/* Cropped from the bottom: the screenshots carry their nav and logo at the top. */}
                   <Image
-                    className="object-cover object-top transition-[scale] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
+                    className={`${item.imageContain ? "object-contain" : "object-cover object-top"} transition-[scale] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]`}
                     src={item.image}
                     alt={`${item.name} – ukázka projektu`}
                     fill
