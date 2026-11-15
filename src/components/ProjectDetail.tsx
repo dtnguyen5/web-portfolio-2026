@@ -2,7 +2,6 @@ import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { type Project, type ProjectDetail as Detail, projects } from "@/data/portfolio";
-import Arrow from "./Arrow";
 import BlockReveal from "./BlockReveal";
 import ScrollToTop from "./ScrollToTop";
 import { contentPadding } from "./shared";
@@ -15,14 +14,10 @@ const revealDelay = (ms: number) => ({ animationDelay: `${ms}ms` }) as CSSProper
 
 const ProjectDetail = ({ project }: ProjectDetailProps) => {
   const { detail } = project;
-  // The next case study in the list; with only one, the link leads back to all projects.
-  const caseStudies = projects.filter((item) => item.detail);
-  const index = caseStudies.findIndex((item) => item.slug === project.slug);
-  const next = caseStudies[(index + 1) % caseStudies.length];
-  const nextLink =
-    next && next.slug !== project.slug
-      ? { href: `/projekty/${next.slug}`, label: "Další projekt" }
-      : { href: "/#projekty", label: "Všechny projekty" };
+  // The other case studies, shown as cards below this one.
+  const otherProjects = projects.filter(
+    (item) => item.detail && item.slug !== project.slug,
+  );
 
   return (
     <article className={`${contentPadding} bg-[#080808] pb-20 pt-32 sm:pb-28 sm:pt-48`}>
@@ -126,22 +121,51 @@ const ProjectDetail = ({ project }: ProjectDetailProps) => {
         <h2 className="m-0 text-2xl font-medium tracking-[-.04em] sm:text-3xl">
           Závěr
         </h2>
-        <div>
-          <p className="m-0 text-lg leading-[1.55] text-[#a5a5a2]">
-            {detail.conclusion}
-          </p>
-          <Link
-            className="group mt-10 flex items-center justify-end gap-2 text-base font-medium transition-colors duration-500 hover:text-[#a5a5a2]"
-            href={nextLink.href}
-          >
-            {nextLink.label}
-            <Arrow
-              className="brightness-0 invert transition-[rotate] duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover:rotate-45"
-              size={16}
-            />
-          </Link>
-        </div>
+        <p className="m-0 text-lg leading-[1.55] text-[#a5a5a2]">
+          {detail.conclusion}
+        </p>
       </div>
+
+      {otherProjects.length > 0 && (
+        <section className="mt-24 sm:mt-36">
+          <div data-reveal className="flex items-center gap-6 sm:gap-8">
+            <h2 className="m-0 shrink-0 text-[2rem] font-medium leading-tight tracking-[-.06em] sm:text-[3.25rem]">
+              Další projekty
+            </h2>
+            <span className="h-px flex-1 bg-[#30302e]" aria-hidden="true" />
+          </div>
+          <div data-reveal className="mt-10 grid gap-12 sm:mt-14 sm:grid-cols-2 sm:gap-8">
+            {otherProjects.map((item) => (
+              <Link
+                className="group block"
+                data-cursor="view"
+                href={`/projekty/${item.slug}`}
+                key={item.slug}
+              >
+                <div className="relative aspect-video overflow-hidden rounded-2xl bg-[#191919]">
+                  {/* Cropped from the bottom: the screenshots carry their nav and logo at the top. */}
+                  <Image
+                    className="object-cover object-top transition-[scale] duration-700 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:scale-[1.03]"
+                    src={item.image}
+                    alt={`${item.name} – ukázka projektu`}
+                    fill
+                    sizes="(max-width: 640px) calc(100vw - 48px), 44vw"
+                  />
+                </div>
+                <span className="mt-6 inline-block rounded-full border border-[#30302e] px-4 py-1.5 text-sm text-[#a5a5a2]">
+                  {item.type}
+                </span>
+                <h3 className="mb-0 mt-4 text-2xl font-medium tracking-[-.04em] sm:text-3xl">
+                  {item.name}
+                </h3>
+                <p className="mb-0 mt-3 text-lg leading-[1.55] text-[#a5a5a2]">
+                  {item.detail?.description}
+                </p>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </article>
   );
 };
