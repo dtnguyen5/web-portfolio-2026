@@ -19,6 +19,7 @@ const SmoothCursor = () => {
     let currentX = targetX;
     let currentY = targetY;
     let animationFrame = 0;
+    let checkFrame = 0;
 
     // Over elements marked with `data-cursor="view"` a light "open" circle
     // grows over the ring.
@@ -34,8 +35,14 @@ const SmoothCursor = () => {
     };
 
     // Scrolling moves the page under a still mouse, e.g. onto a project card.
+    // Checked at most once a frame.
     const checkUnderCursor = () => {
-      updateView(document.elementFromPoint(targetX, targetY));
+      if (!checkFrame) {
+        checkFrame = requestAnimationFrame(() => {
+          checkFrame = 0;
+          updateView(document.elementFromPoint(targetX, targetY));
+        });
+      }
     };
 
     const hideCursor = () => {
@@ -44,10 +51,13 @@ const SmoothCursor = () => {
     };
 
     const animateCursor = () => {
-      currentX += (targetX - currentX) * 0.05;
-      currentY += (targetY - currentY) * 0.05;
-      cursor.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) translate(-50%, -50%)`;
-      view.style.transform = cursor.style.transform;
+      // Skip the style write while the ring has caught up with the mouse.
+      if (Math.abs(targetX - currentX) > 0.1 || Math.abs(targetY - currentY) > 0.1) {
+        currentX += (targetX - currentX) * 0.05;
+        currentY += (targetY - currentY) * 0.05;
+        cursor.style.transform = `translate3d(${currentX}px, ${currentY}px, 0) translate(-50%, -50%)`;
+        view.style.transform = cursor.style.transform;
+      }
       animationFrame = requestAnimationFrame(animateCursor);
     };
 
@@ -61,6 +71,7 @@ const SmoothCursor = () => {
       window.removeEventListener("scroll", checkUnderCursor);
       document.documentElement.removeEventListener("mouseleave", hideCursor);
       cancelAnimationFrame(animationFrame);
+      cancelAnimationFrame(checkFrame);
     };
   }, []);
 

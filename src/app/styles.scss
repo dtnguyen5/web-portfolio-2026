@@ -158,10 +158,20 @@ body {
   }
 }
 
-.scroll-stack-section-02 {
+// The section right after the hero slides up over its pinned title.
+.hero-cover-next {
   margin-top: calc(-1 * var(--hero-cover-space, 0px));
   // Own layer, so Safari on iPad can't paint the sticky hero title over it.
   transform: translateZ(0);
+}
+
+// The laptop scrolls by like a normal section; the camera moves on its own.
+.laptop-scroll {
+  height: 62svh;
+
+  @include up(sm) {
+    height: 100svh;
+  }
 }
 
 // Hero

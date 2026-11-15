@@ -5,6 +5,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { experience, tools } from "@/data/portfolio";
 import Arrow from "./Arrow";
 import BlockReveal from "./BlockReveal";
+import LaptopShowcase from "./LaptopShowcase";
 import ProjectList from "./ProjectList";
 import SectionLabel from "./SectionLabel";
 import ServiceList from "./ServiceList";
@@ -17,7 +18,11 @@ import SmoothScroll from "./SmoothScroll";
 const buttonClass =
   "inline-flex h-13 items-center gap-6 rounded-full bg-[#f1f0ec] px-6 text-base font-medium text-[#080808]";
 
-const Portfolio = () => {
+type PortfolioProps = {
+  laptopScreens: string[];
+};
+
+const Portfolio = ({ laptopScreens }: PortfolioProps) => {
   const [sent, setSent] = useState(false);
   const heroTitleRef = useRef<HTMLDivElement>(null);
   const heroInfoRef = useRef<HTMLDivElement>(null);
@@ -52,20 +57,34 @@ const Portfolio = () => {
 
     sectionRevealItems.forEach((item) => sectionObserver.observe(item));
 
-    const revealSectionsOnScroll = () => {
-      sectionRevealItems.forEach((item) => {
+    // Fallback for fast scrolling. At most once a frame, only for sections
+    // still hidden, and it stops listening once every section is shown.
+    let frame = 0;
+    const revealSections = () => {
+      frame = 0;
+      const hidden = Array.from(sectionRevealItems).filter((item) => !item.classList.contains("is-visible"));
+      hidden.forEach((item) => {
         if (item.getBoundingClientRect().top < window.innerHeight * 0.92) {
           item.classList.add("is-visible");
         }
       });
+      if (hidden.every((item) => item.classList.contains("is-visible"))) {
+        window.removeEventListener("scroll", revealSectionsOnScroll);
+      }
+    };
+    const revealSectionsOnScroll = () => {
+      if (!frame) {
+        frame = requestAnimationFrame(revealSections);
+      }
     };
 
-    revealSectionsOnScroll();
+    revealSections();
     window.addEventListener("scroll", revealSectionsOnScroll, {
       passive: true,
     });
 
     return () => {
+      cancelAnimationFrame(frame);
       sectionObserver.disconnect();
       window.removeEventListener("scroll", revealSectionsOnScroll);
     };
@@ -326,6 +345,8 @@ const Portfolio = () => {
         </div>
         <div className="hero-cover-spacer" aria-hidden="true" />
       </section>
+
+      <LaptopShowcase screens={laptopScreens} />
 
       <section
         className={`scroll-stack-section scroll-stack-section-02 ${contentPadding} bg-[#111] pb-20 pt-16 sm:pb-28`}
