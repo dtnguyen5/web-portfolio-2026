@@ -112,7 +112,7 @@ const SiteNav = ({ base = "" }: SiteNavProps) => {
         {/* While compact only the logo and button show; hovering or
             focusing the pill opens the links again. */}
         <div
-          className={`hidden items-center gap-4 rounded-full border border-[#1f1f1f] bg-[#080808] py-2.5 text-base font-medium text-[#f1f0ec] transition-[padding] duration-600 ease-[cubic-bezier(0.65,0,0.35,1)] sm:flex ${
+          className={`hidden items-center gap-4 rounded-full bg-[#141414]/70 py-2.5 shadow-[inset_0_1px_0_rgb(255_255_255/0.06)] backdrop-blur-xl text-base font-medium text-[#f1f0ec] transition-[padding] duration-600 ease-[cubic-bezier(0.65,0,0.35,1)] sm:flex ${
             navCompact && !navActive ? "pl-6 pr-2.5" : "pl-9 pr-6"
           }`}
           onMouseEnter={() => setNavActive(true)}
