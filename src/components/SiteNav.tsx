@@ -211,9 +211,11 @@ const SiteNav = ({ base = "" }: SiteNavProps) => {
                 onClick={() => setMenuOpen(false)}
                 style={{ "--item-delay": `${index * 90}ms` } as CSSProperties}
               >
-                <span className="overflow-hidden">
+                {/* The hover shift moves the whole mask, so the text is
+                    never clipped by its own overflow-hidden wrapper. */}
+                <span className="overflow-hidden transition-[translate] duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover:translate-x-2">
                   <span className="mobile-menu-reveal block">
-                    <span className="block transition-[color,translate] duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover:translate-x-2 group-hover:text-[#a5a5a2] group-active:text-[#a5a5a2]">
+                    <span className="block transition-colors duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover:text-[#a5a5a2] group-active:text-[#a5a5a2]">
                       {label}
                     </span>
                   </span>

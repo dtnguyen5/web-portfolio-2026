@@ -24,14 +24,18 @@ const SiteFooter = () => (
       <div className="order-3 flex justify-between gap-2 text-[#f1f0ec] sm:order-none sm:gap-7">
         {socialLinks.map(({ label, href }) => (
           <a
-            className="flex items-center gap-1.5"
+            className="group flex items-center gap-1.5 transition-colors duration-500 ease-in-out hover:text-[#a5a5a2] focus-visible:text-[#a5a5a2]"
             href={href}
             key={label}
             rel="noopener noreferrer"
             target="_blank"
           >
             {label.toUpperCase()}{" "}
-            <Arrow className="brightness-0 invert" size={12} />
+            {/* The arrow nudges up and to the right, towards where the link leads. */}
+            <Arrow
+              className="brightness-0 invert transition-[translate,opacity] duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-60 group-focus-visible:translate-x-0.5 group-focus-visible:-translate-y-0.5 group-focus-visible:opacity-60"
+              size={12}
+            />
           </a>
         ))}
       </div>
