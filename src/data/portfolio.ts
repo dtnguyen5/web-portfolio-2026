@@ -111,6 +111,48 @@ export const projects: Project[] = [
     },
   },
   {
+    slug: "deliviet",
+    name: "DeliViet",
+    type: "Web design",
+    image: "/DeliViet1.png",
+    imageRatio: "1440/900",
+    mark: "DeliViet",
+    detail: {
+      description:
+        "Návrh webu pro vietnamskou restauraci Deli Viet, který staví na výrazné typografii a fotkách jídel.",
+      facts: [
+        { label: "Klient", value: "Deli Viet" },
+        { label: "Odvětví", value: "Gastronomie" },
+        { label: "Služba", value: "Web design" },
+      ],
+      sections: [
+        {
+          title: "Přehled",
+          text: "Deli Viet je vietnamská restaurace s nabídkou přes 30 jídel z čerstvých surovin. Cílem bylo navrhnout web, který návštěvníkům rychle ukáže menu a navnadí je k objednávce.",
+        },
+        {
+          title: "Výzva",
+          text: "Web musel přenést atmosféru restaurace a chuť jídel na obrazovku a zároveň zůstat přehledný. Návštěvník měl během pár vteřin pochopit, co restaurace nabízí, a snadno se dostat k menu nebo objednávce.",
+        },
+        {
+          title: "Řešení",
+          text: "Postavil jsem web na kontrastu výrazného kondenzovaného písma a velkých fotek jídel. Hlavní výzvy k akci jsem odlišil výraznou barvou, menu jsem rozdělil do přehledných kategorií a nejoblíbenější jídla představil v samostatné sekci specialit.",
+        },
+        {
+          title: "Výsledek",
+          text: "Vznikl web s jasnou identitou, který působí chutně a moderně. Výrazná typografie a fotky jídel drží jednotný styl napříč všemi sekcemi.",
+        },
+      ],
+      gallery: [
+        { label: "Nahlédněte do naší kuchyně", image: "/DeliViet2.png", ratio: "4/3" },
+        { label: "Kategorie menu", image: "/DeliViet4.png", ratio: "4/3" },
+        { label: "Speciality", image: "/DeliViet3.png", ratio: "1440/897", wide: true },
+      ],
+      conclusion:
+        "Projekt mi ukázal, jak velkou roli hraje v gastronomii fotografie a typografie. Naučil jsem se navrhovat web tak, aby vzbudil chuť a zároveň vedl návštěvníka rovnou k objednávce.",
+    },
+  },
+  {
     slug: "florise",
     name: "Florise",
     type: "Web design",
