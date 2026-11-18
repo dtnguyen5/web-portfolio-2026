@@ -264,6 +264,87 @@ $hero-reveal-delays: (
 
 // About
 
+// Tool pills: on hover they turn into a pane of frosted glass with a light
+// edge on top, and a soft shine sweeps across. Everything eases in and out
+// slowly, so the change feels gradual rather than a switch.
+$glass-ease: cubic-bezier(0.4, 0, 0.2, 1);
+$glass-duration: 700ms;
+
+.tool-glass {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  // Same shadow layers as on hover, only transparent, so they blend smoothly.
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0),
+    inset 0 -1px 0 rgb(255 255 255 / 0),
+    0 10px 24px -10px rgb(0 0 0 / 0);
+  transition:
+    color $glass-duration $glass-ease,
+    border-color $glass-duration $glass-ease,
+    background-color $glass-duration $glass-ease,
+    box-shadow $glass-duration $glass-ease;
+
+  // The glass tint: brighter at the top, like light falling on it.
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background: linear-gradient(180deg, rgb(255 255 255 / 0.14), rgb(255 255 255 / 0.02) 60%);
+    opacity: 0;
+    transition: opacity $glass-duration $glass-ease;
+  }
+
+  // The shine, parked off the left edge until hover. On leaving it fades out
+  // first and only then moves back, so it never jumps.
+  &::after {
+    content: "";
+    position: absolute;
+    inset: -50% auto -50% 0;
+    z-index: -1;
+    width: 45%;
+    background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.16), transparent);
+    opacity: 0;
+    transform: translateX(-160%) skewX(-20deg);
+    pointer-events: none;
+    transition:
+      opacity 500ms $glass-ease,
+      transform 0s linear 500ms;
+  }
+
+  &:hover,
+  &:focus-visible {
+    color: #f1f0ec;
+    border-color: rgb(255 255 255 / 0.2);
+    background-color: rgb(255 255 255 / 0.04);
+    backdrop-filter: blur(12px) saturate(140%);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.22),
+      inset 0 -1px 0 rgb(255 255 255 / 0.04),
+      0 10px 24px -10px rgb(0 0 0 / 0.8);
+
+    &::before {
+      opacity: 1;
+    }
+
+    &::after {
+      opacity: 1;
+      transform: translateX(360%) skewX(-20deg);
+      transition:
+        opacity 300ms $glass-ease,
+        transform 1600ms cubic-bezier(0.45, 0, 0.25, 1);
+    }
+  }
+
+  @include reduced-motion {
+    &::after {
+      display: none;
+    }
+  }
+}
+
 .about-sidebar {
   position: static;
 

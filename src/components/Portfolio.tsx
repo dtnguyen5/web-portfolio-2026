@@ -427,7 +427,7 @@ const Portfolio = () => {
               <div className="flex flex-wrap gap-2.5">
                 {tools.map((tool) => (
                   <span
-                    className="cursor-default rounded-full border border-[#30302e] px-4 py-2.5 text-[#a5a5a2] transition-colors duration-300 hover:border-[#f1f0ec] hover:bg-[#f1f0ec] hover:text-[#080808] focus-visible:border-[#f1f0ec] focus-visible:bg-[#f1f0ec] focus-visible:text-[#080808]"
+                    className="tool-glass cursor-default rounded-full border border-[#30302e] px-4 py-2.5 text-[#a5a5a2] outline-none"
                     key={tool}
                     tabIndex={0}
                   >
