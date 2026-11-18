@@ -386,19 +386,20 @@ $projects-heading-height: var(--projects-heading-height, 9rem);
   }
 }
 
-.block-reveal {
-  &:not(.is-visible) {
-    opacity: 0;
-  }
-
-  &.is-visible {
-    animation: block-reveal 1100ms $ease-out var(--reveal-delay, 0ms) both;
-  }
+// Set by BlockReveal; the blocks are hidden until then by its own style tag.
+[data-revealed] {
+  animation: block-reveal 1100ms $ease-out var(--reveal-delay, 0ms) both;
 
   @include reduced-motion {
     opacity: 1 !important;
     animation: none !important;
   }
+}
+
+// Set by RevealDone once an entrance animation has finished, so it doesn't
+// replay when Next.js shows a hidden page again on back navigation.
+[data-reveal-done] {
+  animation: none !important;
 }
 
 // Mobile menu: the panel grows as a circle out of the burger button

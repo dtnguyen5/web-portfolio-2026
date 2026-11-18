@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import { IBM_Plex_Mono, Inter } from "next/font/google";
+import RevealDone from "@/components/RevealDone";
 import "./globals.css";
 import "./styles.scss";
 
@@ -27,6 +28,7 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
       className={`${inter.variable} ${plexMono.variable} h-full antialiased`}
     >
       <body className="min-h-full bg-[#080808] font-sans text-[#f1f0ec]">
+        <RevealDone />
         {children}
       </body>
     </html>

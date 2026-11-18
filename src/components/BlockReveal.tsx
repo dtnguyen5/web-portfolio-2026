@@ -11,16 +11,20 @@ const BlockReveal = ({ selectors }: BlockRevealProps) => {
   const selector = selectors.join(", ");
 
   useEffect(() => {
-    if (
-      !("IntersectionObserver" in window) ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    ) {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return;
     }
 
-    const revealBlocks = [...document.querySelectorAll<HTMLElement>(selector)];
+    // Blocks already shown stay shown. Next.js keeps visited pages in the
+    // document, so this runs again when one is shown again on back navigation.
+    const revealBlocks = [
+      ...document.querySelectorAll<HTMLElement>(selector),
+    ].filter((item) => !item.hasAttribute("data-revealed"));
 
-    revealBlocks.forEach((item) => item.classList.add("block-reveal"));
+    if (!("IntersectionObserver" in window)) {
+      revealBlocks.forEach((item) => item.setAttribute("data-revealed", ""));
+      return;
+    }
 
     const reveal: IntersectionObserverCallback = (entries, observer) => {
       entries
@@ -28,7 +32,7 @@ const BlockReveal = ({ selectors }: BlockRevealProps) => {
         .forEach((entry, index) => {
           const item = entry.target as HTMLElement;
           item.style.setProperty("--reveal-delay", `${Math.min(index, 4) * 140}ms`);
-          item.classList.add("is-visible");
+          item.setAttribute("data-revealed", "");
           observer.unobserve(item);
         });
     };
@@ -46,11 +50,21 @@ const BlockReveal = ({ selectors }: BlockRevealProps) => {
     return () => {
       observer.disconnect();
       footerObserver.disconnect();
-      revealBlocks.forEach((item) => item.classList.remove("block-reveal", "is-visible"));
     };
   }, [selector]);
 
-  return null;
+  // State lives in data attributes, not classes: React rewrites the whole
+  // class attribute whenever a block's className changes (e.g. on hover),
+  // which would wipe classes added here and hide the block again.
+  //
+  // The style tag hides the blocks already in the server HTML. Otherwise the browser paints
+  // them before the script runs, and they show once without the animation
+  // and then a second time sliding in. Without scripts they stay visible.
+  return (
+    <style>
+      {`@media (scripting: enabled) and (prefers-reduced-motion: no-preference) { :is(${selector}):not([data-revealed]) { opacity: 0; } }`}
+    </style>
+  );
 };
 
 export default BlockReveal;

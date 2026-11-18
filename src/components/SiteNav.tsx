@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { CSSProperties, useEffect, useState } from "react";
+import { CSSProperties, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { contact } from "@/data/portfolio";
 import Arrow from "./Arrow";
 import { fillHoverClass, socialLinks } from "./shared";
@@ -18,12 +18,32 @@ const SiteNav = ({ base = "" }: SiteNavProps) => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [navCompact, setNavCompact] = useState(false);
   const [navActive, setNavActive] = useState(false);
+  // Skips the open/close transition while the nav (re)appears.
+  const [navInstant, setNavInstant] = useState(true);
+  const navRef = useRef<HTMLElement>(null);
   const links = [
     ["Domů", `${base}#domu`],
     ["O mně", `${base}#o-mne`],
     ["Služby", `${base}#sluzby`],
     ["Projekty", `${base}#projekty`],
   ];
+
+  // Next.js hides the page instead of unmounting it on navigation, and shows
+  // it again on back navigation. The nav then appears in its last state
+  // without animating, and the hover state and mobile menu are reset, so it
+  // never comes back half open.
+  useLayoutEffect(() => {
+    setNavInstant(true);
+    let frame = requestAnimationFrame(() => {
+      frame = requestAnimationFrame(() => setNavInstant(false));
+    });
+
+    return () => {
+      cancelAnimationFrame(frame);
+      setNavActive(false);
+      setMenuOpen(false);
+    };
+  }, []);
 
   useEffect(() => {
     let frame = 0;
@@ -33,6 +53,11 @@ const SiteNav = ({ base = "" }: SiteNavProps) => {
     // opens again on scrolling up or near the top of the page.
     const update = () => {
       frame = 0;
+      // A hidden page (display: none) has no boxes. Its nav keeps its state,
+      // the scrolling belongs to the page shown instead.
+      if (!navRef.current?.getClientRects().length) {
+        return;
+      }
       const y = window.scrollY;
       const delta = y - lastY;
 
@@ -95,7 +120,7 @@ const SiteNav = ({ base = "" }: SiteNavProps) => {
 
   return (
     <>
-      <nav className="hero-reveal fixed inset-x-0 top-0 z-70 flex items-center justify-between bg-[#080808]/80 px-6 py-4 backdrop-blur-md sm:top-8 sm:h-19 sm:justify-center sm:bg-transparent sm:px-[5.56vw] sm:py-0 sm:backdrop-blur-none">
+      <nav ref={navRef} className="hero-reveal fixed inset-x-0 top-0 z-70 flex items-center justify-between bg-[#080808]/80 px-6 py-4 backdrop-blur-md sm:top-8 sm:h-19 sm:justify-center sm:bg-transparent sm:px-[5.56vw] sm:py-0 sm:backdrop-blur-none">
         <a
           className="sm:hidden"
           href={`${base}#domu`}
@@ -112,7 +137,7 @@ const SiteNav = ({ base = "" }: SiteNavProps) => {
         {/* While compact only the logo and button show; hovering or
             focusing the pill opens the links again. */}
         <div
-          className={`hidden items-center gap-4 rounded-full bg-[#141414]/70 py-2.5 shadow-[inset_0_1px_0_rgb(255_255_255/0.06)] backdrop-blur-xl text-base font-medium text-[#f1f0ec] transition-[padding] duration-600 ease-[cubic-bezier(0.65,0,0.35,1)] sm:flex ${
+          className={`hidden items-center gap-4 rounded-full bg-[#141414]/70 py-2.5 shadow-[inset_0_1px_0_rgb(255_255_255/0.06)] backdrop-blur-xl text-base font-medium text-[#f1f0ec] transition-[padding] duration-600 ease-[cubic-bezier(0.65,0,0.35,1)] sm:flex ${navInstant ? "transition-none!" : ""} ${
             navCompact && !navActive ? "pl-6 pr-2.5" : "pl-9 pr-6"
           }`}
           onMouseEnter={() => setNavActive(true)}
@@ -133,7 +158,7 @@ const SiteNav = ({ base = "" }: SiteNavProps) => {
             />
           </a>
           <div
-            className={`grid transition-[grid-template-columns,opacity] duration-600 ease-[cubic-bezier(0.65,0,0.35,1)] ${
+            className={`grid transition-[grid-template-columns,opacity] duration-600 ease-[cubic-bezier(0.65,0,0.35,1)] ${navInstant ? "transition-none!" : ""} ${
               navCompact && !navActive
                 ? "grid-cols-[0fr] opacity-0"
                 : "grid-cols-[1fr] opacity-100"

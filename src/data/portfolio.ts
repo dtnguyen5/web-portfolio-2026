@@ -112,11 +112,11 @@ export const projects: Project[] = [
   },
   {
     slug: "deliviet",
-    name: "DeliViet",
+    name: "Deli Viet",
     type: "Web design",
     image: "/DeliViet1.png",
     imageRatio: "1440/900",
-    mark: "DeliViet",
+    mark: "Deli Viet",
     detail: {
       description:
         "Návrh webu pro vietnamskou restauraci Deli Viet, který staví na výrazné typografii a fotkách jídel.",
