@@ -631,7 +631,7 @@ const Portfolio = () => {
               />
             </label>
             <button
-              className={`${buttonClass} ${fillHoverClass} group mt-7 self-start border before:bg-[#1f1f1f] hover:text-[#f1f0ec] focus-visible:text-[#f1f0ec]`}
+              className={`${buttonClass} ${fillHoverClass} submit-button group mt-7 self-start before:bg-[#1f1f1f] hover:text-[#f1f0ec] focus-visible:text-[#f1f0ec]`}
               type="submit"
             >
               Odeslat{" "}

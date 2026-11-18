@@ -544,3 +544,21 @@ $menu-origin: calc(100% - 2.875rem) 2.375rem;
     scale: 1;
   }
 }
+
+// Contact form button. The dark fill rises over a light layer. If both were
+// cut by the same rounded edge, the smoothing of that edge would let a thin
+// light line through while the fill rises. So the button itself is dark and
+// the light layer sits 1px inside it: the fill always covers it fully, and
+// the 1px dark rim is invisible on the dark page.
+.submit-button {
+  background-color: #1f1f1f;
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 1px;
+    z-index: -20;
+    border-radius: 9999px;
+    background-color: #f1f0ec;
+  }
+}
