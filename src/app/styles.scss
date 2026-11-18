@@ -165,15 +165,6 @@ body {
   transform: translateZ(0);
 }
 
-// The laptop scrolls by like a normal section; the camera moves on its own.
-.laptop-scroll {
-  height: 62svh;
-
-  @include up(sm) {
-    height: 100svh;
-  }
-}
-
 // Hero
 
 .hero-reveal {

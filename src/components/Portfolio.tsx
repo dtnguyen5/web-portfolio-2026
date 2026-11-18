@@ -5,7 +5,6 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import { experience, tools } from "@/data/portfolio";
 import Arrow from "./Arrow";
 import BlockReveal from "./BlockReveal";
-import LaptopShowcase from "./LaptopShowcase";
 import ProjectList from "./ProjectList";
 import SectionLabel from "./SectionLabel";
 import ServiceList from "./ServiceList";
@@ -18,11 +17,7 @@ import SmoothScroll from "./SmoothScroll";
 const buttonClass =
   "inline-flex h-13 items-center gap-6 rounded-full bg-[#f1f0ec] px-6 text-base font-medium text-[#080808]";
 
-type PortfolioProps = {
-  laptopScreens: string[];
-};
-
-const Portfolio = ({ laptopScreens }: PortfolioProps) => {
+const Portfolio = () => {
   const [sent, setSent] = useState(false);
   const heroTitleRef = useRef<HTMLDivElement>(null);
   const heroInfoRef = useRef<HTMLDivElement>(null);
@@ -346,10 +341,8 @@ const Portfolio = ({ laptopScreens }: PortfolioProps) => {
         <div className="hero-cover-spacer" aria-hidden="true" />
       </section>
 
-      <LaptopShowcase screens={laptopScreens} />
-
       <section
-        className={`scroll-stack-section scroll-stack-section-02 ${contentPadding} bg-[#111] pb-20 pt-16 sm:pb-28`}
+        className={`scroll-stack-section scroll-stack-section-02 hero-cover-next ${contentPadding} bg-[#111] pb-20 pt-16 sm:pb-28`}
         id="o-mne"
       >
         <SectionLabel>O MNĚ</SectionLabel>
