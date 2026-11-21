@@ -1,6 +1,13 @@
+/* =============================================================================
+ * SECTION LABEL – malý šedý popisek nad sekcí („O MNĚ“, „SLUŽBY“…)
+ * -----------------------------------------------------------------------------
+ * Vlevo text, vpravo volitelně číslo.
+ * Použití: <SectionLabel number="02">SLUŽBY</SectionLabel>
+ * ========================================================================== */
+
 type SectionLabelProps = {
-  children: string;
-  number?: string;
+  children: string; // text popisku
+  number?: string; // číslo vpravo (nepovinné)
 };
 
 const SectionLabel = ({ children, number }: SectionLabelProps) => (

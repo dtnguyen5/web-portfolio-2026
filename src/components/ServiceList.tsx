@@ -1,5 +1,13 @@
 "use client";
 
+/* =============================================================================
+ * SERVICE LIST – seznam služeb v sekci „Služby“
+ * -----------------------------------------------------------------------------
+ * Řádky služeb (Web design, Vývoj, Grafika…). Při najetí myší se řádek
+ * zvýrazní a vedle kurzoru se objeví náhledový obrázek, který ho následuje.
+ * Data služeb jsou v data/portfolio.ts (services).
+ * ========================================================================== */
+
 import Image from "next/image";
 import {
   MouseEvent,
@@ -11,8 +19,10 @@ import {
 import { createPortal } from "react-dom";
 import { services } from "@/data/portfolio";
 
+// Prázdné „přihlášení“ pro useSyncExternalStore níž (nic se nemění)
 const subscribeNoop = () => () => {};
 
+// Posune náhledový obrázek kousek vpravo dolů od kurzoru (o 24 px)
 const placePreview = (preview: HTMLElement | null, x: number, y: number) => {
   if (preview) {
     preview.style.left = `${x + 24}px`;
@@ -21,17 +31,20 @@ const placePreview = (preview: HTMLElement | null, x: number, y: number) => {
 };
 
 const ServiceList = () => {
+  // Index právě zvýrazněné služby (null = žádná)
   const [activeService, setActiveService] = useState<number | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const previewRef = useRef<HTMLDivElement>(null);
-  // The preview lives in <body>: the section's reveal animation transforms it,
-  // which would make `position: fixed` relative to the section, not the screen.
+  // Náhled se vkládá přímo do <body>: animace sekce používá transform a ten
+  // by způsobil, že `position: fixed` počítá pozici od sekce, ne od obrazovky.
+  // (Na serveru <body> není → null, náhled se vykreslí až v prohlížeči.)
   const portalTarget = useSyncExternalStore(
     subscribeNoop,
     () => document.body,
     () => null,
   );
 
+  /* --- Zvýraznění řádku při scrollu (myš stojí, stránka se hýbe) --- */
   useEffect(() => {
     const list = listRef.current;
 
@@ -42,8 +55,8 @@ const ServiceList = () => {
     let frame = 0;
     let pointer: { x: number; y: number } | null = null;
 
-    // Scrolling moves the rows under a resting cursor without any mouse
-    // event, so the row under the cursor is looked up after every scroll.
+    // Scroll posouvá řádky pod stojícím kurzorem bez jakékoli události myši,
+    // proto se po každém scrollu dohledá, nad kterým řádkem kurzor je.
     const update = () => {
       frame = 0;
 
@@ -64,8 +77,8 @@ const ServiceList = () => {
       }
     };
 
-    // `mouseover` also comes from the browser's own hover check after a
-    // scroll, so the position is known even before the mouse has moved.
+    // `mouseover` posílá prohlížeč i sám po scrollu, takže pozici známe,
+    // i když se myš ještě nepohnula. Dotyky (prst) se ignorují.
     const trackPointer = (event: globalThis.MouseEvent) => {
       if (!(event instanceof PointerEvent) || event.pointerType === "mouse") {
         pointer = { x: event.clientX, y: event.clientY };
@@ -90,11 +103,14 @@ const ServiceList = () => {
     };
   }, []);
 
+  // Náhled následuje kurzor
   const movePreview = (event: MouseEvent<HTMLElement>) =>
     placePreview(previewRef.current, event.clientX, event.clientY);
 
   return (
     <div ref={listRef} onMouseLeave={() => setActiveService(null)}>
+      {/* --- Řádky služeb ---
+          Zvýraznění: myší (hover), klávesnicí (Tab → focus) i klepnutím na mobilu */}
       {services.map((service, index) => {
         const isActive = activeService === index;
 
@@ -120,6 +136,7 @@ const ServiceList = () => {
             onMouseLeave={() => setActiveService(null)}
             onMouseMove={movePreview}
           >
+            {/* Číslo služby (01, 02…) */}
             <div
               className={`flex justify-between font-mono text-xs transition-colors duration-300 ${
                 isActive ? "text-[#f1f0ec]" : "text-[#a5a5a2]"
@@ -127,6 +144,7 @@ const ServiceList = () => {
             >
               {String(index + 1).padStart(2, "0")}
             </div>
+            {/* Název služby */}
             <h3
               className={`mt-11 text-2xl tracking-[-.04em] transition-colors duration-300 sm:mt-6 sm:text-4xl lg:mt-0 ${
                 isActive ? "text-[#f1f0ec]" : "text-[#a5a5a2]"
@@ -134,6 +152,7 @@ const ServiceList = () => {
             >
               {service.title}
             </h3>
+            {/* Dovednosti ve dvou sloupcích */}
             <div
               className={`mt-6 grid grid-cols-2 gap-x-6 gap-y-2.5 text-sm transition-colors duration-300 sm:text-base lg:mt-0 ${
                 isActive ? "text-[#f1f0ec]" : "text-[#a5a5a2]"
@@ -146,6 +165,7 @@ const ServiceList = () => {
           </article>
         );
       })}
+      {/* --- Náhledový obrázek u kurzoru (jen na počítači, md a víc) --- */}
       {portalTarget &&
         createPortal(
           <div
@@ -154,8 +174,8 @@ const ServiceList = () => {
             }`}
             ref={previewRef}
           >
-            {/* Rendered at twice its size so it stays sharp on retina screens
-                and while the card is tilted. */}
+            {/* Načítá se v dvojnásobné velikosti, aby byl ostrý na retina
+                displejích i když je kartička natočená. */}
             {activeService !== null && (
               <Image
                 className="object-cover"

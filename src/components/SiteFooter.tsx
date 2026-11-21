@@ -1,3 +1,10 @@
+/* =============================================================================
+ * SITE FOOTER – patička („POJĎME TVOŘIT“, e-mail, telefon, sociální sítě)
+ * -----------------------------------------------------------------------------
+ * Je na úvodní stránce i na detailu projektu. E-mail a telefon se berou
+ * z data/portfolio.ts (contact), sociální sítě ze shared.tsx (socialLinks).
+ * ========================================================================== */
+
 import { contact } from "@/data/portfolio";
 import Arrow from "./Arrow";
 import SectionLabel from "./SectionLabel";
@@ -6,18 +13,22 @@ import { contentPadding, socialLinks } from "./shared";
 const SiteFooter = () => (
   <footer className={`scroll-reveal-section scroll-stack-section-07 ${contentPadding} bg-[#080808] pb-9 pt-16 sm:pt-22`}>
     <SectionLabel>PŘIPRAVENÝ TVOŘIT NĚCO NOVÉHO</SectionLabel>
+    {/* --- Velký nápis --- */}
     <div className="my-10 flex items-center justify-between sm:my-14">
       <h2 className="m-0 text-[3.3125rem] tracking-[-.08em] sm:text-[9vw]">
         POJĎME TVOŘIT
       </h2>
     </div>
+    {/* --- Kontakty (e-mail, telefon) --- */}
     <div className="h-px bg-[#30302e]" />
     <div className="flex flex-col gap-3 whitespace-nowrap py-7 text-xl sm:flex-row sm:flex-wrap sm:justify-between sm:gap-x-10 sm:py-10 sm:text-3xl lg:text-[2.75rem]">
       <a href={`mailto:${contact.email}`}>{contact.email}</a>
+      {/* tel: odkaz bez mezer, aby šlo na mobilu rovnou volat */}
       <a href={`tel:${contact.phone.replace(/\s/g, "")}`}>
         {contact.phone}
       </a>
     </div>
+    {/* --- Spodní lišta: copyright, sociální sítě, podpis --- */}
     <div className="h-px bg-[#30302e]" />
     <div className="grid gap-5 pt-6 font-mono text-[0.625rem] text-[#a5a5a2] sm:flex sm:items-center sm:justify-between">
       <span>©2026 HONZA</span>
@@ -31,7 +42,7 @@ const SiteFooter = () => (
             target="_blank"
           >
             {label.toUpperCase()}{" "}
-            {/* The arrow nudges up and to the right, towards where the link leads. */}
+            {/* Šipka při hoveru poskočí nahoru doprava – směrem, kam odkaz vede. */}
             <Arrow
               className="brightness-0 invert transition-[translate,opacity] duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:opacity-60 group-focus-visible:translate-x-0.5 group-focus-visible:-translate-y-0.5 group-focus-visible:opacity-60"
               size={12}

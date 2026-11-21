@@ -1,33 +1,62 @@
+/* =============================================================================
+ * DATA PORTFOLIA – všechny texty a obsah na jednom místě
+ * -----------------------------------------------------------------------------
+ * Když chceš změnit text, přidat projekt nebo službu, stačí upravit tenhle
+ * soubor – komponenty si data berou odsud.
+ *
+ *   services    – služby (sekce Služby)
+ *   projects    – projekty (karty + stránky detailu /projekty/<slug>)
+ *   tools       – nástroje (sekce O mně → 03 Nástroje)
+ *   experience  – škola a praxe (sekce O mně → 02 Škola & praxe)
+ *   contact     – e-mail a telefon (patička, mobilní menu)
+ *
+ * Obrázky patří do složky public/ a píšou se s lomítkem na začátku: "/obrazek.png".
+ * Když obrázek vyměníš, ulož ho pod NOVÝM názvem (např. -v2), jinak se může
+ * zobrazovat stará verze z cache.
+ * ========================================================================== */
+
+/* =============================================================================
+ * TYPY – popisují, jaká pole musí mít služba / projekt
+ * ========================================================================== */
+
+// Jedna služba v sekci Služby
 export type Service = {
-  title: string;
-  skills: string[];
-  image: string;
+  title: string; // název (velkými písmeny)
+  skills: string[]; // dovednosti – zobrazí se ve dvou sloupcích
+  image: string; // náhled, který se ukáže u kurzoru při najetí myší
 };
 
+// Obsah stránky detailu projektu
 export type ProjectDetail = {
-  description: string;
-  facts: { label: string; value: string }[];
-  sections: { title: string; text: string }[];
-  // Items without an image show a placeholder with their label. `ratio` is the
-  // tile aspect ratio for an image; tiles in one row should share it.
+  description: string; // krátký popis pod názvem (a na kartách „Další projekty“)
+  facts: { label: string; value: string }[]; // fakta vedle sebe (Klient, Odvětví, Služba)
+  sections: { title: string; text: string }[]; // textové sekce (Přehled, Výzva, Řešení, Výsledek)
+  // Galerie. Položka bez `image` ukáže zástupný rámeček s popiskem.
+  // `ratio` = poměr stran obrázku (např. "4/3"); obrázky v jedné řadě by ho měly mít stejný.
+  // `wide: true` = obrázek přes celou šířku.
   gallery: { label: string; image?: string; ratio?: string; wide?: boolean }[];
-  conclusion: string;
+  conclusion: string; // text v sekci Závěr
 };
 
+// Jeden projekt
 export type Project = {
-  slug: string;
-  name: string;
-  type: string;
-  image: string;
-  // Aspect ratio of the image (width / height), so it can show uncropped.
+  slug: string; // část adresy: /projekty/<slug> (malá písmena, bez mezer)
+  name: string; // název projektu
+  type: string; // štítek na kartě (Web design, Grafický design…)
+  image: string; // hlavní obrázek (karta + detail)
+  // Poměr stran obrázku (šířka/výška), aby se dal ukázat neořezaný.
   imageRatio: string;
-  // Images on a plain background (not website screenshots) are never
-  // cropped; the background fills the free space around them.
+  // true pro obrázky na jednobarevném pozadí (ne screenshoty webu) – nikdy se
+  // neořezávají, volné místo kolem vyplní černé pozadí.
   imageContain?: boolean;
-  mark: string;
+  mark: string; // zkrácený název (momentálně se na webu nikde nezobrazuje)
+  // Obsah detailu. Bez něj karta nevede na detail, ale na kontaktní formulář.
   detail?: ProjectDetail;
 };
 
+/* =============================================================================
+ * SLUŽBY (sekce „Moje služby“) – pořadí zde = pořadí na webu
+ * ========================================================================== */
 export const services: Service[] = [
   {
     title: "UI / UX DESIGN",
@@ -67,7 +96,11 @@ export const services: Service[] = [
   },
 ];
 
+/* =============================================================================
+ * PROJEKTY (sekce „Zpracované projekty“) – pořadí zde = pořadí karet
+ * ========================================================================== */
 export const projects: Project[] = [
+  /* --- 01 ZadyFit --- */
   {
     slug: "zadyfit",
     name: "ZadyFit",
@@ -110,6 +143,7 @@ export const projects: Project[] = [
         "Práce v profesionálním studiu mi ukázala reálný proces tvorby digitálních produktů od vizuálního návrhu až po hotový web. Naučil jsem se efektivně pracovat ve Frameru, který výrazně zrychluje cestu od návrhu k funkčnímu výsledku.",
     },
   },
+  /* --- 02 Deli Viet --- */
   {
     slug: "deliviet",
     name: "Deli Viet",
@@ -152,6 +186,7 @@ export const projects: Project[] = [
         "Projekt mi ukázal, jak velkou roli hraje v gastronomii fotografie a typografie. Naučil jsem se navrhovat web tak, aby vzbudil chuť a zároveň vedl návštěvníka rovnou k objednávce.",
     },
   },
+  /* --- 03 Florise --- */
   {
     slug: "florise",
     name: "Florise",
@@ -194,6 +229,7 @@ export const projects: Project[] = [
         "Redesign mi dal příležitost přemýšlet nad různými způsoby zpracování a hledat řešení, které bude fungovat pro klienta i jeho návštěvníky. Rady a postupy, které jsem ve studiu získal, chci dál využívat i ve vlastních projektech.",
     },
   },
+  /* --- 04 SMRK studio (vizitky) --- */
   {
     slug: "smrk-studio",
     name: "SMRK studio",
@@ -228,13 +264,16 @@ export const projects: Project[] = [
           text: "Vznikla dvojice stran, které spolu barevně kontrastují, ale drží jednotný styl studia. Vizitka zůstala přehledná a díky QR kódu propojuje tištěnou podobu přímo s webem studia.",
         },
       ],
-      gallery: [],
+      gallery: [], // bez galerie – sekce se na stránce nezobrazí
       conclusion:
         "Projekt mi ukázal, jak pracovat s existující vizuální identitou v tištěné podobě. Naučil jsem se na malém formátu rozhodnout, co je opravdu důležité, a dát každé informaci své místo.",
     },
   },
 ];
 
+/* =============================================================================
+ * NÁSTROJE (O mně → 03 / 03 Nástroje)
+ * ========================================================================== */
 export const tools = [
   "Figma",
   "Framer",
@@ -246,12 +285,16 @@ export const tools = [
   "Git",
 ];
 
+/* =============================================================================
+ * ŠKOLA & PRAXE (O mně → 02 / 03)
+ * ========================================================================== */
 export const experience = {
   school: {
     label: "ŠKOLA",
     title: "Střední škola informatiky a finančních služeb",
-    description: ["Obor: Informační technologie", "Zaměření: Grafika na PC"],
+    description: ["Obor: Informační technologie", "Zaměření: Grafika na PC"], // každá položka = nový řádek
   },
+  // Praxe / práce – každá dostane vlastní řádek s čarou nad sebou
   jobs: [
     {
       label: "PRAXE · ÚNOR 2026",
@@ -266,6 +309,9 @@ export const experience = {
   ],
 };
 
+/* =============================================================================
+ * KONTAKT (patička, mobilní menu)
+ * ========================================================================== */
 export const contact = {
   email: "duytiepn1@gmail.com",
   phone: "+420 608 088 388",

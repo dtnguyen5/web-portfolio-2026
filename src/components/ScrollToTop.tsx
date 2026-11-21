@@ -2,12 +2,16 @@
 
 import { useEffect, useRef } from "react";
 
-// Project pages share one layout, so without this a new project would open
-// at the scroll position of the previous one.
+/* =============================================================================
+ * SCROLL TO TOP – nově otevřený projekt začne nahoře
+ * -----------------------------------------------------------------------------
+ * Stránky projektů sdílejí jeden layout, takže bez tohohle by se nový projekt
+ * otevřel na stejné pozici scrollu jako ten předchozí.
+ * ========================================================================== */
 const ScrollToTop = () => {
-  // Next.js hides visited pages instead of unmounting them, and the Effect
-  // runs again when one is shown on back navigation. The ref survives that,
-  // so only a freshly opened page jumps to the top.
+  // Next.js navštívené stránky jen schovává (neodstraňuje) a při návratu zpět
+  // se tenhle efekt spustí znovu. Ref to přežije, takže nahoru skočí jen
+  // čerstvě otevřená stránka, ne ta, na kterou se vracíš.
   const done = useRef(false);
 
   useEffect(() => {
@@ -17,6 +21,7 @@ const ScrollToTop = () => {
 
     done.current = true;
 
+    // Když adresa míří na kotvu (#neco), necháme prohlížeč odscrollovat tam
     if (!window.location.hash) {
       window.scrollTo({ top: 0, behavior: "instant" });
     }

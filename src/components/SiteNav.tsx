@@ -1,26 +1,39 @@
 "use client";
 
+/* =============================================================================
+ * SITE NAV – navigace
+ * -----------------------------------------------------------------------------
+ * Počítač/tablet (sm+): plovoucí „pilulka“ uprostřed nahoře (logo, odkazy,
+ *   Napište mi). Při scrollu dolů se zmenší jen na logo + „Právě k dispozici“,
+ *   při scrollu nahoru nebo najetí myší se zase rozbalí.
+ * Mobil: lišta s logem a hamburgerem; po kliknutí se otevře menu přes celou
+ *   obrazovku (kruh vyroste z tlačítka – animace .mobile-menu v styles.scss).
+ * ========================================================================== */
+
 import Image from "next/image";
 import { CSSProperties, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { contact } from "@/data/portfolio";
 import Arrow from "./Arrow";
 import { fillHoverClass, socialLinks } from "./shared";
 
+// Vzhled odkazů v pilulce (při hoveru zešednou)
 const navLinkClass =
   "transition-colors duration-500 ease-in-out hover:text-[#a5a5a2]";
 
 type SiteNavProps = {
-  // Prefix for the section anchors, "/" on pages other than the home page.
+  // Předpona odkazů na sekce: na úvodní stránce "" (#o-mne), jinde "/" (/#o-mne).
   base?: string;
 };
 
 const SiteNav = ({ base = "" }: SiteNavProps) => {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const [navCompact, setNavCompact] = useState(false);
-  const [navActive, setNavActive] = useState(false);
-  // Skips the open/close transition while the nav (re)appears.
+  /* --- Stav --- */
+  const [menuOpen, setMenuOpen] = useState(false); // mobilní menu otevřené
+  const [navCompact, setNavCompact] = useState(false); // pilulka zmenšená (scroll dolů)
+  const [navActive, setNavActive] = useState(false); // myš/focus na pilulce → rozbalit
+  // Vypne animaci rozbalení/zabalení, když se navigace (znovu) objeví.
   const [navInstant, setNavInstant] = useState(true);
   const navRef = useRef<HTMLElement>(null);
+  // Odkazy v menu: [text, kam vede]. Nový odkaz přidej sem.
   const links = [
     ["Domů", `${base}#domu`],
     ["O mně", `${base}#o-mne`],
@@ -28,10 +41,10 @@ const SiteNav = ({ base = "" }: SiteNavProps) => {
     ["Projekty", `${base}#projekty`],
   ];
 
-  // Next.js hides the page instead of unmounting it on navigation, and shows
-  // it again on back navigation. The nav then appears in its last state
-  // without animating, and the hover state and mobile menu are reset, so it
-  // never comes back half open.
+  /* --- Návrat na stránku (tlačítko Zpět) ---
+     Next.js stránku při přechodu jen schová a při návratu ji znovu ukáže.
+     Navigace se pak objeví v posledním stavu bez animace a hover i mobilní
+     menu se vynulují, aby se nikdy nevrátila napůl otevřená. */
   useLayoutEffect(() => {
     setNavInstant(true);
     let frame = requestAnimationFrame(() => {
@@ -49,12 +62,14 @@ const SiteNav = ({ base = "" }: SiteNavProps) => {
     let frame = 0;
     let lastY = window.scrollY;
 
-    // The desktop nav shrinks to the logo and button while scrolling down and
-    // opens again on scrolling up or near the top of the page.
+    /* --- Zmenšení pilulky při scrollu ---
+       Při scrollu dolů se zmenší na logo + tlačítko, při scrollu nahoru nebo
+       u horního okraje stránky (prvních 120 px) se zase rozbalí.
+       4 px = drobné pohyby se ignorují, aby to necukalo. */
     const update = () => {
       frame = 0;
-      // A hidden page (display: none) has no boxes. Its nav keeps its state,
-      // the scrolling belongs to the page shown instead.
+      // Schovaná stránka (display: none) nemá rozměry. Její navigace si nechá
+      // svůj stav – scroll patří stránce, která je zrovna vidět.
       if (!navRef.current?.getClientRects().length) {
         return;
       }
@@ -93,7 +108,9 @@ const SiteNav = ({ base = "" }: SiteNavProps) => {
       return;
     }
 
-    // The page underneath must not scroll while the mobile menu is open.
+    /* --- Otevřené mobilní menu ---
+       Stránka pod ním se nesmí scrollovat. Menu zavře klávesa Escape
+       nebo roztažení okna na velikost tabletu/počítače (40rem+). */
     const root = document.documentElement;
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
@@ -120,7 +137,9 @@ const SiteNav = ({ base = "" }: SiteNavProps) => {
 
   return (
     <>
+      {/* ===================== HORNÍ LIŠTA ===================== */}
       <nav ref={navRef} className="hero-reveal fixed inset-x-0 top-0 z-70 flex items-center justify-between bg-[#080808]/80 px-6 py-4 backdrop-blur-md sm:top-8 sm:h-19 sm:justify-center sm:bg-transparent sm:px-[5.56vw] sm:py-0 sm:backdrop-blur-none">
+        {/* Logo – jen mobil */}
         <a
           className="sm:hidden"
           href={`${base}#domu`}
@@ -134,8 +153,9 @@ const SiteNav = ({ base = "" }: SiteNavProps) => {
             height={34}
           />
         </a>
-        {/* While compact only the logo and button show; hovering or
-            focusing the pill opens the links again. */}
+        {/* --- Pilulka (jen tablet/počítač) ---
+            Zmenšená ukazuje jen logo a tlačítko; najetí myší nebo focus
+            (klávesnice) ji zase rozbalí. */}
         <div
           className={`hidden items-center gap-4 rounded-full bg-[#141414]/70 py-2.5 shadow-[inset_0_1px_0_rgb(255_255_255/0.06)] backdrop-blur-xl text-base font-medium text-[#f1f0ec] transition-[padding] duration-600 ease-[cubic-bezier(0.65,0,0.35,1)] sm:flex ${navInstant ? "transition-none!" : ""} ${
             navCompact && !navActive ? "pl-6 pr-2.5" : "pl-9 pr-6"
@@ -149,6 +169,7 @@ const SiteNav = ({ base = "" }: SiteNavProps) => {
             }
           }}
         >
+          {/* Logo v pilulce */}
           <a href={`${base}#domu`} aria-label="Domů">
             <Image
               src="/Osobní značka.svg"
@@ -157,6 +178,7 @@ const SiteNav = ({ base = "" }: SiteNavProps) => {
               height={30}
             />
           </a>
+          {/* Odkazy – při zmenšení se „sbalí“ na nulovou šířku (grid 0fr ↔ 1fr) */}
           <div
             className={`grid transition-[grid-template-columns,opacity] duration-600 ease-[cubic-bezier(0.65,0,0.35,1)] ${navInstant ? "transition-none!" : ""} ${
               navCompact && !navActive
@@ -174,6 +196,7 @@ const SiteNav = ({ base = "" }: SiteNavProps) => {
               </div>
             </div>
           </div>
+          {/* Vpravo: zmenšená → „Právě k dispozici“, rozbalená → tlačítko Napište mi */}
           {navCompact && !navActive ? (
             <span className="flex items-center gap-3 whitespace-nowrap py-2.5 pr-3">
               <span
@@ -191,6 +214,7 @@ const SiteNav = ({ base = "" }: SiteNavProps) => {
             </a>
           )}
         </div>
+        {/* Hamburger – jen mobil */}
         <button
           className="flex h-11 w-11 items-center justify-center rounded-full border border-[#f5f2e9] sm:hidden"
           type="button"
@@ -199,7 +223,7 @@ const SiteNav = ({ base = "" }: SiteNavProps) => {
           aria-expanded={menuOpen}
           aria-controls="mobile-menu"
         >
-          {/* The two lines turn into a cross while the menu is open. */}
+          {/* Dvě čárky se při otevření menu změní na křížek. */}
           <span className="relative h-1.75 w-5.5" aria-hidden="true">
             <span
               className={`absolute inset-x-0 top-0 h-px bg-[#f5f2e9] transition-[translate,rotate] duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] ${
@@ -214,8 +238,10 @@ const SiteNav = ({ base = "" }: SiteNavProps) => {
           </span>
         </button>
       </nav>
-      {/* The panel grows as a circle out of the burger button, then the
-          links rise from behind a mask like the hero headline. */}
+      {/* ===================== MOBILNÍ MENU =====================
+          Panel vyroste jako kruh z hamburgeru a pak odkazy vyjedou zpoza
+          masky stejně jako nadpis v heru. inert = zavřené menu nejde
+          ovládat klávesnicí; data-lenis-prevent = Lenis tu nescrolluje. */}
       <div
         className={`mobile-menu fixed inset-0 z-60 flex flex-col overflow-y-auto bg-[#080808] px-6 pb-10 pt-4 sm:hidden ${
           menuOpen ? "is-open" : ""
@@ -224,8 +250,9 @@ const SiteNav = ({ base = "" }: SiteNavProps) => {
         inert={!menuOpen}
         data-lenis-prevent
       >
-        {/* Space for the fixed nav bar, whose logo and button stay on top of the menu. */}
+        {/* Místo pro horní lištu – její logo a tlačítko zůstávají nad menu. */}
         <div className="h-11 shrink-0" aria-hidden="true" />
+        {/* Odkazy (+ Napište mi navíc). Každý vyjede o 90 ms později než předchozí. */}
         <nav className="mt-16 flex flex-col">
           {[...links, ["Napište mi", `${base}#kontakt`]].map(
             ([label, href], index) => (
@@ -236,8 +263,8 @@ const SiteNav = ({ base = "" }: SiteNavProps) => {
                 onClick={() => setMenuOpen(false)}
                 style={{ "--item-delay": `${index * 90}ms` } as CSSProperties}
               >
-                {/* The hover shift moves the whole mask, so the text is
-                    never clipped by its own overflow-hidden wrapper. */}
+                {/* Posun při hoveru hýbe celou maskou, takže text nikdy
+                    neořízne jeho vlastní obal s overflow-hidden. */}
                 <span className="overflow-hidden transition-[translate] duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover:translate-x-2">
                   <span className="mobile-menu-reveal block">
                     <span className="block transition-colors duration-500 ease-[cubic-bezier(0.33,1,0.68,1)] group-hover:text-[#a5a5a2] group-active:text-[#a5a5a2]">
@@ -259,6 +286,7 @@ const SiteNav = ({ base = "" }: SiteNavProps) => {
             ),
           )}
         </nav>
+        {/* Kontakty a sociální sítě dole v menu */}
         <div
           className="mobile-menu-fade mt-10 flex flex-col gap-3"
           style={{ "--item-delay": "450ms" } as CSSProperties}

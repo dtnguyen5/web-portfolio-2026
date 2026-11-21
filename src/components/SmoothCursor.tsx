@@ -1,8 +1,17 @@
 "use client";
 
+/* =============================================================================
+ * SMOOTH CURSOR – vlastní kurzor (bílý kroužek, který plynule dojíždí za myší)
+ * -----------------------------------------------------------------------------
+ * Nativní kurzor je schovaný (styles.scss → cursor: none). Nad prvky
+ * s data-cursor="view" (karty projektů) se kroužek zvětší na velké světlé
+ * kolečko se šipkou. Jen na počítači (md a víc), na mobilu se neukazuje.
+ * ========================================================================== */
+
 import { useEffect, useRef } from "react";
 
 const SmoothCursor = () => {
+  // cursorRef = malý kroužek, viewRef = velké kolečko se šipkou
   const cursorRef = useRef<HTMLDivElement>(null);
   const viewRef = useRef<HTMLDivElement>(null);
 
@@ -14,6 +23,8 @@ const SmoothCursor = () => {
       return;
     }
 
+    // target = kde je myš, current = kde je teď kroužek (dojíždí za target).
+    // Začíná mimo obrazovku (-100), dokud se myš nepohne.
     let targetX = -100;
     let targetY = -100;
     let currentX = targetX;
@@ -21,11 +32,11 @@ const SmoothCursor = () => {
     let animationFrame = 0;
     let checkFrame = 0;
 
-    // Over elements marked with `data-cursor="view"` a light "open" circle
-    // grows over the ring.
-    // The event target isn't always an Element (Firefox can report `document`
-    // or a text node), and those have no `closest`. Text nodes are resolved to
-    // their parent; anything else without `closest` counts as "not over a card".
+    /* --- Velké kolečko nad kartami projektů --- */
+    // Nad prvky s `data-cursor="view"` se přes kroužek zvětší světlé kolečko.
+    // Cíl události nemusí být HTML prvek (Firefox umí poslat `document` nebo
+    // textový uzel) a ty `closest` nemají. U textu se vezme jeho rodič,
+    // cokoli jiného bez `closest` se bere jako „není nad kartou“.
     const updateView = (target: EventTarget | null) => {
       const node = target as Node | null;
       const element = (node?.nodeType === 3 ? node.parentElement : node) as Element | null;
@@ -34,6 +45,7 @@ const SmoothCursor = () => {
       view.toggleAttribute("data-active", isOverView);
     };
 
+    /* --- Pohyb myši → nový cíl pro kroužek --- */
     const moveCursor = (event: MouseEvent) => {
       targetX = event.clientX;
       targetY = event.clientY;
@@ -41,8 +53,9 @@ const SmoothCursor = () => {
       updateView(event.target);
     };
 
-    // Scrolling moves the page under a still mouse, e.g. onto a project card.
-    // Checked at most once a frame.
+    /* --- Scroll bez pohybu myši ---
+       Stránka se může posunout pod stojící myší (třeba na kartu projektu).
+       Kontroluje se maximálně jednou za snímek. */
     const checkUnderCursor = () => {
       if (!checkFrame) {
         checkFrame = requestAnimationFrame(() => {
@@ -52,13 +65,16 @@ const SmoothCursor = () => {
       }
     };
 
+    /* --- Myš opustila okno → schovat kurzor --- */
     const hideCursor = () => {
       cursor.style.opacity = "0";
       updateView(null);
     };
 
+    /* --- Animace: každý snímek posune kroužek o 5 % zbývající vzdálenosti ---
+       (0.05 níž = rychlost dojíždění; větší číslo = kurzor je rychlejší) */
     const animateCursor = () => {
-      // Skip the style write while the ring has caught up with the mouse.
+      // Když už kroužek myš dohnal, nic se nepřepisuje (šetří výkon).
       if (Math.abs(targetX - currentX) > 0.1 || Math.abs(targetY - currentY) > 0.1) {
         currentX += (targetX - currentX) * 0.05;
         currentY += (targetY - currentY) * 0.05;
@@ -68,6 +84,7 @@ const SmoothCursor = () => {
       animationFrame = requestAnimationFrame(animateCursor);
     };
 
+    /* --- Zapnutí posluchačů + úklid při odchodu ze stránky --- */
     window.addEventListener("mousemove", moveCursor);
     window.addEventListener("scroll", checkUnderCursor, { passive: true });
     document.documentElement.addEventListener("mouseleave", hideCursor);
@@ -84,12 +101,14 @@ const SmoothCursor = () => {
 
   return (
     <>
+      {/* Malý bílý kroužek */}
       <div
         aria-hidden="true"
         className="pointer-events-none fixed left-0 top-0 z-[100] hidden h-8 w-8 rounded-full border-2 border-transparent opacity-0 transition-opacity duration-200 md:block"
         ref={cursorRef}
         style={{ borderColor: "#ffffff" }}
       />
+      {/* Velké kolečko se šipkou ↗ (nad kartami projektů, styl .view-cursor v styles.scss) */}
       <div
         aria-hidden="true"
         className="pointer-events-none fixed left-0 top-0 z-[101] hidden md:block"

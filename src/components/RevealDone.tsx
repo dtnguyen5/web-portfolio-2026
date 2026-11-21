@@ -1,8 +1,16 @@
 "use client";
 
+/* =============================================================================
+ * REVEAL DONE – úvodní animace se přehrají jen jednou
+ * -----------------------------------------------------------------------------
+ * Vložené v layout.tsx, nic nevykresluje. Po doběhnutí animace označí prvek
+ * atributem data-reveal-done, aby se animace při návratu na stránku
+ * nepřehrála znovu (viz podrobné vysvětlení níž u komponenty).
+ * ========================================================================== */
+
 import { useEffect } from "react";
 
-// Entrance animations that should play only once.
+// Názvy úvodních animací (@keyframes v styles.scss), které se mají přehrát jen jednou.
 const revealAnimations = new Set([
   "hero-reveal",
   "hero-text-reveal",
@@ -10,25 +18,26 @@ const revealAnimations = new Set([
   "block-reveal",
 ]);
 
-// React attaches its own key to an element once it has hydrated it, after
-// comparing the element's attributes with the server HTML.
+// Pozná, jestli už React prvek „oživil“ (hydratace). React si k prvku přidá
+// vlastní klíč, až když porovná jeho atributy s HTML ze serveru.
 const isHydrated = (element: Element) =>
   Object.keys(element).some((key) => key.startsWith("__reactFiber$"));
 
-// Next.js keeps visited pages in the document and only hides them
-// (display: none). Showing a page again restarts its CSS animations, so the
-// content would vanish and slide in a second time. Once an entrance animation
-// has finished, its element is marked so it keeps its final state. A data
-// attribute, so React re-rendering the className doesn't remove it.
+// Proč to existuje: Next.js navštívené stránky nechává v dokumentu a jen je
+// schová (display: none). Když se stránka znovu ukáže, CSS animace se spustí
+// znovu – obsah by zmizel a znovu vyjel. Proto se prvek po doběhnutí úvodní
+// animace označí a zůstane ve finálním stavu. Je to data atribut (ne třída),
+// aby ho React nesmazal, když přepíše className.
 //
-// An animation can finish before React has hydrated its element (the hero
-// does in development). Marking it then would make the attributes differ
-// from the server HTML, so such elements wait until they are hydrated.
+// Animace může doběhnout dřív, než React prvek oživí (v dev režimu třeba
+// hero). Kdyby se označil hned, lišily by se atributy od HTML ze serveru
+// a React by hlásil chybu – takové prvky proto počkají, až budou oživené.
 const RevealDone = () => {
   useEffect(() => {
     const pending = new Set<Element>();
     let timer = 0;
 
+    // Označí čekající prvky, které už React oživil. Zbytek zkusí znovu za 250 ms.
     const markPending = () => {
       timer = 0;
       pending.forEach((element) => {
@@ -44,6 +53,7 @@ const RevealDone = () => {
       }
     };
 
+    // Doběhla nějaká animace → pokud je to úvodní, zařadí prvek do fronty
     const markDone = (event: AnimationEvent) => {
       if (!revealAnimations.has(event.animationName)) {
         return;
@@ -56,7 +66,7 @@ const RevealDone = () => {
 
     document.addEventListener("animationend", markDone);
 
-    // Animations that finished before this listener was added.
+    // Animace, které doběhly ještě předtím, než se tenhle posluchač zapnul.
     document.getAnimations().forEach((animation) => {
       const target = (animation.effect as KeyframeEffect | null)?.target;
       if (

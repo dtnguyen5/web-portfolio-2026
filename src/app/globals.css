@@ -1,6 +1,14 @@
-/* Tailwind only. It can't go through Sass, so custom styles live in styles.scss. */
+/* =============================================================================
+ * GLOBALS.CSS – jen Tailwind
+ * -----------------------------------------------------------------------------
+ * Tailwind nejde prohnat přes Sass, proto je tady sám. Vlastní styly webu
+ * (animace, scroll efekty, menu…) jsou v styles.scss.
+ * ========================================================================== */
 @import "tailwindcss";
 
+/* Napojení fontů z layout.tsx na Tailwind třídy:
+ *   font-sans → Inter (běžný text)
+ *   font-mono → IBM Plex Mono (malé popisky, čísla sekcí) */
 @theme inline {
   --font-sans: var(--font-inter);
   --font-mono: var(--font-plex-mono);
