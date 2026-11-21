@@ -165,7 +165,7 @@ function CameraRig() {
 export default function Avatar3D() {
   // --- Otáčení myší jen na počítači ---
   // Na dotykových zařízeních by OrbitControls blokoval scroll stránky
-  // (nastavuje touch-action: none), proto ho povolíme jen pro myš.
+  // (nastavuje touch-action: none), proto se vykreslí jen pro myš.
   // (komponenta se načítá s ssr: false, takže window tu vždy existuje)
   const [canOrbit] = useState(
     () => typeof window !== 'undefined' && window.matchMedia('(hover: hover) and (pointer: fine)').matches,
@@ -230,18 +230,22 @@ export default function Avatar3D() {
           </Suspense>
 
           {/* --- Otáčení levým tlačítkem myši ---
-              Do stran dokola (360°), nahoru/dolů omezeně, aby kamera nešla pod podlahu. */}
-          <OrbitControls
-            enabled={canOrbit}
-            target={TARGET}
-            enablePan={false} // posouvání vypnuté
-            enableZoom={false} // kolečko myši scrolluje stránku, nezoomuje
-            enableDamping // po puštění plynule dobrzdí
-            rotateSpeed={ORBIT_SPEED}
-            maxPolarAngle={Math.PI * 0.52} // max. úhel shora dolů (≈ 94°, kousek pod vodorovnou)
-            onStart={() => (dragging.current = true)}
-            onEnd={() => (dragging.current = false)}
-          />
+              Do stran dokola (360°), nahoru/dolů omezeně, aby kamera nešla pod podlahu.
+              Na mobilu se vůbec nevykreslí: OrbitControls se k plátnu připojí
+              i s enabled={false} a nastaví mu touch-action: none → tah prstem
+              přes postavičku by neposouval stránku. */}
+          {canOrbit && (
+            <OrbitControls
+              target={TARGET}
+              enablePan={false} // posouvání vypnuté
+              enableZoom={false} // kolečko myši scrolluje stránku, nezoomuje
+              enableDamping // po puštění plynule dobrzdí
+              rotateSpeed={ORBIT_SPEED}
+              maxPolarAngle={Math.PI * 0.52} // max. úhel shora dolů (≈ 94°, kousek pod vodorovnou)
+              onStart={() => (dragging.current = true)}
+              onEnd={() => (dragging.current = false)}
+            />
+          )}
         </Canvas>
       )}
     </div>
