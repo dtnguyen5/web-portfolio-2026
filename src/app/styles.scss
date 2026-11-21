@@ -1,27 +1,55 @@
+// =============================================================================
+// STYLES.SCSS – vlastní styly a animace webu
+// -----------------------------------------------------------------------------
+// Běžné styly jsou přímo v komponentách jako Tailwind třídy. Sem patří jen
+// to, co Tailwindem napsat nejde nebo by bylo nepřehledné (animace, scroll
+// efekty, pseudo-elementy…).
+//
+// Obsah (shora dolů):
+//   1. PROMĚNNÉ A MIXINY   – barvy, křivky animací, breakpointy
+//   2. ZÁKLAD              – html, body, skrytý kurzor, pole formuláře
+//   3. KEYFRAMES           – definice animací
+//   4. SKLÁDÁNÍ SEKCÍ      – sekce najíždějí přes sebe
+//   5. HERO                – úvodní animace nápisu, přilepený nadpis
+//   6. O MNĚ               – skleněné štítky nástrojů, přilepený levý sloupec
+//   7. PROJEKTY            – zmenšující se nadpis, skládání karet
+//   8. STATEMENT           – výška sekce s textem na oblouku
+//   9. ANIMACE PŘI SCROLLU – sekce a bloky vyjíždějí zespodu
+//  10. MOBILNÍ MENU        – kruh z hamburgeru, vyjíždějící odkazy
+//  11. KURZOR A TLAČÍTKO   – velké kolečko nad projekty, tlačítko Odeslat
+// =============================================================================
+
 @use "sass:map";
 
-// Colours shared with the Tailwind classes in the components.
-$color-text: #f1f0ec;
-$color-line: #30302e;
-$color-line-hover: #5a5a57;
+// =============================================================================
+// 1. PROMĚNNÉ A MIXINY
+// =============================================================================
 
+// Barvy – stejné jako v Tailwind třídách v komponentách.
+$color-text: #f1f0ec; // světlý text
+$color-line: #30302e; // tenké čáry a okraje
+$color-line-hover: #5a5a57; // okraj při hoveru
+
+// Křivky animací (jak se pohyb zrychluje / zpomaluje)
 $ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 $ease-in: cubic-bezier(0.55, 0, 1, 0.45);
 $ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
 $ease-menu: cubic-bezier(0.76, 0, 0.24, 1);
 
-// Same widths as Tailwind's `sm` and `lg`.
+// Breakpointy – stejné šířky jako Tailwind `sm` (tablet) a `lg` (počítač).
 $breakpoints: (
   sm: 40rem,
   lg: 64rem,
 );
 
+// @include up(sm) { … }   → platí od dané šířky výš
 @mixin up($name) {
   @media (min-width: map.get($breakpoints, $name)) {
     @content;
   }
 }
 
+// @include down(sm) { … } → platí jen pod danou šířkou
 @mixin down($name) {
   $max: map.get($breakpoints, $name) - 0.01rem;
 
@@ -30,14 +58,18 @@ $breakpoints: (
   }
 }
 
+// @include reduced-motion { … } → pro lidi, kteří mají v systému vypnuté animace
 @mixin reduced-motion {
   @media (prefers-reduced-motion: reduce) {
     @content;
   }
 }
 
-// Base
+// =============================================================================
+// 2. ZÁKLAD
+// =============================================================================
 
+// Výchozí barva všech okrajů
 * {
   border-color: $color-line;
 }
@@ -54,13 +86,14 @@ html {
 body {
   margin: 0;
 
+  // Na zařízeních s myší se schová nativní kurzor (místo něj SmoothCursor)
   @media (pointer: fine) {
     cursor: none;
   }
 }
 
-// Text fields get a white outline while someone types in them. Set here because the
-// global border colour above outranks Tailwind's border utilities.
+// Pole formuláře: při psaní dostanou bílý okraj. Je to tady, protože výchozí
+// barva okrajů výš (*) přebíjí Tailwind třídy pro okraje.
 .form-field {
   transition:
     border-color 300ms ease,
@@ -76,8 +109,11 @@ body {
   }
 }
 
-// Keyframes
+// =============================================================================
+// 3. KEYFRAMES – definice animací
+// =============================================================================
 
+// Vyjetí zespodu + zobrazení (navigace, texty v heru)
 @keyframes hero-reveal {
   from {
     opacity: 0;
@@ -90,6 +126,7 @@ body {
   }
 }
 
+// Čára se „nakreslí“ zleva doprava
 @keyframes hero-line-reveal {
   from {
     clip-path: inset(0 100% 0 0);
@@ -100,6 +137,7 @@ body {
   }
 }
 
+// Řádek nadpisu vyjede zpoza masky (zespodu)
 @keyframes hero-text-reveal {
   from {
     opacity: 0;
@@ -112,6 +150,7 @@ body {
   }
 }
 
+// Sekce lehce vyjede nahoru při scrollu
 @keyframes section-rise {
   from {
     transform: translate3d(0, 4.5rem, 0);
@@ -122,7 +161,8 @@ body {
   }
 }
 
-// Uses `translate` so it never fights with elements that animate `transform`.
+// Blok vyjede zespodu (BlockReveal). Používá `translate`, ne `transform`,
+// aby se nepraly s prvky, které `transform` animují samy.
 @keyframes block-reveal {
   from {
     opacity: 0;
@@ -135,20 +175,23 @@ body {
   }
 }
 
-// Section stacking: each section slides over the previous one.
+// =============================================================================
+// 4. SKLÁDÁNÍ SEKCÍ – každá sekce najede přes tu předchozí
+// =============================================================================
 
 .scroll-stack-section {
   position: relative;
   isolation: isolate;
 }
 
+// .scroll-stack-section-01 … -07 → z-index 1 … 7 (pozdější sekce je navrchu)
 @for $i from 1 through 7 {
   .scroll-stack-section-0#{$i} {
     z-index: $i;
   }
 }
 
-// From tablets up, the visible hero (without the cover spacer) fills the whole first screen.
+// Od tabletu výš vyplní viditelná část hera (bez místa navíc) celou první obrazovku.
 .scroll-stack-section-01 {
   display: flex;
   flex-direction: column;
@@ -158,15 +201,18 @@ body {
   }
 }
 
-// The section right after the hero slides up over its pinned title.
+// Sekce hned za herem (O mně) najede přes jeho přilepený nadpis.
 .hero-cover-next {
   margin-top: calc(-1 * var(--hero-cover-space, 0px));
-  // Own layer, so Safari on iPad can't paint the sticky hero title over it.
+  // Vlastní vrstva, aby Safari na iPadu nevykreslil přilepený nadpis přes ni.
   transform: translateZ(0);
 }
 
-// Hero
+// =============================================================================
+// 5. HERO
+// =============================================================================
 
+// Obecné vyjetí (navigace, popisky, texty)
 .hero-reveal {
   animation: hero-reveal 1s $ease-out both;
 
@@ -176,6 +222,7 @@ body {
   }
 }
 
+// Jeden řádek velkého nadpisu – maska, zpoza které text vyjede
 .hero-title-line {
   display: block;
   overflow: hidden;
@@ -192,6 +239,7 @@ body {
   }
 }
 
+// Řádky nadpisu vyjedou postupně, každý o kousek později
 $hero-line-delays: (
   primary: 100ms,
   secondary: 280ms,
@@ -204,6 +252,8 @@ $hero-line-delays: (
   }
 }
 
+// Velký nadpis zůstává přilepený a při překrývání sekcí O mně se mírně
+// zmenší (o 6 %) a ztmavne. --hero-cover-progress (0–1) posílá Portfolio.tsx.
 .hero-title-sticky {
   --hero-cover-progress: 0;
   position: sticky;
@@ -223,19 +273,21 @@ $hero-line-delays: (
   }
 }
 
+// Spodní část hera (čára + texty) – jede přes nadpis
 .hero-info-cover {
   position: relative;
   z-index: 1;
   flex-grow: 1;
 
-  // On phones the hero is only as tall as its content, so a small gap stays
-  // below the info text before the next section slides in.
+  // Na mobilu je hero jen tak vysoké jako obsah, takže pod textem zůstane
+  // malá mezera, než najede další sekce.
   @include down(sm) {
     padding-bottom: 2.5rem;
   }
 }
 
-// Sticky elements can't move into parent padding, so the extra space must be a real element.
+// Místo navíc, během kterého nadpis „stojí“. Musí to být skutečný prvek –
+// přilepené prvky se neumí posunout do paddingu rodiče.
 .hero-cover-spacer {
   flex-shrink: 0;
   height: var(--hero-cover-space, 0px);
@@ -250,6 +302,7 @@ $hero-line-delays: (
   }
 }
 
+// Pořadí úvodní animace: čára (1,25 s) → levý text → pravý text → popisek nahoře
 $hero-reveal-delays: (
   hero-info-left: 1500ms,
   hero-info-right: 1750ms,
@@ -262,11 +315,13 @@ $hero-reveal-delays: (
   }
 }
 
-// About
+// =============================================================================
+// 6. O MNĚ
+// =============================================================================
 
-// Tool pills: on hover they turn into a pane of frosted glass with a light
-// edge on top, and a soft shine sweeps across. Everything eases in and out
-// slowly, so the change feels gradual rather than a switch.
+// Štítky nástrojů: při hoveru se změní na matné sklo se světlou hranou
+// nahoře a přes ně přejede jemný odlesk. Vše se mění pomalu, aby to
+// působilo plynule, ne jako přepnutí.
 $glass-ease: cubic-bezier(0.4, 0, 0.2, 1);
 $glass-duration: 700ms;
 
@@ -274,7 +329,7 @@ $glass-duration: 700ms;
   position: relative;
   overflow: hidden;
   isolation: isolate;
-  // Same shadow layers as on hover, only transparent, so they blend smoothly.
+  // Stejné vrstvy stínu jako při hoveru, jen průhledné – aby přechod byl plynulý.
   box-shadow:
     inset 0 1px 0 rgb(255 255 255 / 0),
     inset 0 -1px 0 rgb(255 255 255 / 0),
@@ -285,7 +340,7 @@ $glass-duration: 700ms;
     background-color $glass-duration $glass-ease,
     box-shadow $glass-duration $glass-ease;
 
-  // The glass tint: brighter at the top, like light falling on it.
+  // Zabarvení skla: nahoře světlejší, jako by na něj padalo světlo.
   &::before {
     content: "";
     position: absolute;
@@ -297,8 +352,8 @@ $glass-duration: 700ms;
     transition: opacity $glass-duration $glass-ease;
   }
 
-  // The shine, parked off the left edge until hover. On leaving it fades out
-  // first and only then moves back, so it never jumps.
+  // Odlesk – čeká schovaný za levým okrajem. Při odjetí myši nejdřív zmizí
+  // a teprve pak se vrátí zpátky, takže nikdy neposkočí.
   &::after {
     content: "";
     position: absolute;
@@ -314,6 +369,7 @@ $glass-duration: 700ms;
       transform 0s linear 500ms;
   }
 
+  // Stav při hoveru / focusu z klávesnice
   &:hover,
   &:focus-visible {
     color: #f1f0ec;
@@ -345,6 +401,7 @@ $glass-duration: 700ms;
   }
 }
 
+// Levý sloupec (postavička + jméno) – na počítači se při scrollu přilepí
 .about-sidebar {
   position: static;
 
@@ -355,6 +412,7 @@ $glass-duration: 700ms;
   }
 }
 
+// Box s 3D postavičkou – na počítači podle výšky okna (max. 42,5rem)
 .about-sidebar-image {
   @include up(lg) {
     height: min(42.5rem, calc(100vh - 8.75rem));
@@ -365,27 +423,35 @@ $glass-duration: 700ms;
   min-width: 0;
 }
 
-// Projects
+// =============================================================================
+// 7. PROJEKTY
+// =============================================================================
 
+// Hodnoty počítá Portfolio.tsx (EFEKT 3):
+//   collapse       = o kolik se nadpis zmenší
+//   heading-height = výška zmenšené lišty (pod ní se lepí karty)
 $projects-collapse: var(--projects-heading-collapse, 0px);
 $projects-heading-height: var(--projects-heading-height, 9rem);
 
+// Přilepený nadpis „Zpracované projekty“, který se při scrollu zmenšuje
 .projects-heading {
   --compact-progress: 0;
   position: sticky;
   top: 0;
-  // Below the cards: smooth scrolling paints a frame before the clip-path
-  // catches up, and the card header must never slip under the heading.
+  // Pod kartami: plynulý scroll vykreslí snímek dřív, než se clip-path
+  // dorovná, a hlavička karty nesmí nikdy zajet pod nadpis.
   z-index: 0;
-  // Layout keeps the full height; the visible part shrinks with the title.
-  // JS also sets the clip-path inline, which Safari repaints reliably.
+  // V layoutu zůstává plná výška; viditelná část se zmenšuje s nadpisem.
+  // JS nastavuje clip-path i přímo na prvku, protože to Safari spolehlivě překreslí.
   margin-bottom: calc(-1 * #{$projects-collapse});
   clip-path: inset(0 0 calc(#{$projects-collapse} * var(--compact-progress)) 0);
 
+  // Popisek „PROJEKTY“ zmizí
   &-label {
     opacity: calc(1 - var(--compact-progress) * 1.5);
   }
 
+  // Nadpis se posune nahoru a zmenší
   &-title {
     transform-origin: 0 0;
     transform: translateY(calc(var(--title-shift, 0px) * var(--compact-progress) * -1))
@@ -397,6 +463,7 @@ $projects-heading-height: var(--projects-heading-height, 9rem);
   padding-top: $projects-collapse;
 }
 
+// Karta projektu – přilepí se pod lištu nadpisu, další karta najede přes ni
 .project-stack-card {
   position: sticky;
   top: $projects-heading-height;
@@ -404,10 +471,9 @@ $projects-heading-height: var(--projects-heading-height, 9rem);
   display: flex;
   flex-direction: column;
 
-  // Phones and upright tablets keep each card at its natural height (the
-  // whole image). Landscape screens stretch it to fill the space below the
-  // sticky heading, but never past the height that shows the whole image
-  // (6rem header, 2px border, content width / image ratio).
+  // Mobily a tablety na výšku: karta má přirozenou výšku (celý obrázek).
+  // Obrazovky na šířku: karta vyplní místo pod nadpisem, ale nikdy víc, než
+  // kolik je potřeba na celý obrázek (6rem hlavička, 2px okraj, šířka / poměr).
   @include up(sm) {
     @media (orientation: landscape) {
       height: min(
@@ -419,7 +485,12 @@ $projects-heading-height: var(--projects-heading-height, 9rem);
   }
 }
 
-// Extra scroll length while the curved statement text slides along the arc.
+// =============================================================================
+// 8. STATEMENT
+// =============================================================================
+
+// Výška sekce = jak dlouho se scrolluje, než text projede po oblouku.
+// Větší číslo = text jede pomaleji (víc scrollu).
 .statement-scroll {
   height: 280svh;
 
@@ -432,8 +503,12 @@ $projects-heading-height: var(--projects-heading-height, 9rem);
   }
 }
 
-// Scroll reveals
+// =============================================================================
+// 9. ANIMACE PŘI SCROLLU
+// =============================================================================
 
+// Sekce lehce vyjede nahoru, když se k ní doscrolluje. V prohlížečích, které
+// umí `animation-timeline: view()`, je pohyb navázaný přímo na scroll.
 .scroll-reveal-section {
   opacity: 1;
   transform: none;
@@ -458,7 +533,7 @@ $projects-heading-height: var(--projects-heading-height, 9rem);
   }
 }
 
-// Set by BlockReveal; the blocks are hidden until then by its own style tag.
+// Atribut přidává BlockReveal; do té doby jsou bloky schované jeho <style> tagem.
 [data-revealed] {
   animation: block-reveal 1100ms $ease-out var(--reveal-delay, 0ms) both;
 
@@ -468,14 +543,18 @@ $projects-heading-height: var(--projects-heading-height, 9rem);
   }
 }
 
-// Set by RevealDone once an entrance animation has finished, so it doesn't
-// replay when Next.js shows a hidden page again on back navigation.
+// Přidává RevealDone po doběhnutí úvodní animace, aby se nepřehrála znovu,
+// když Next.js při návratu zpět znovu ukáže schovanou stránku.
 [data-reveal-done] {
   animation: none !important;
 }
 
-// Mobile menu: the panel grows as a circle out of the burger button
-// (centre = 1.5rem side padding + half of the 2.75rem button).
+// =============================================================================
+// 10. MOBILNÍ MENU
+// =============================================================================
+
+// Panel vyroste jako kruh z hamburgeru
+// (střed = 1,5rem boční okraj + polovina tlačítka 2,75rem).
 
 $menu-origin: calc(100% - 2.875rem) 2.375rem;
 
@@ -503,7 +582,7 @@ $menu-origin: calc(100% - 2.875rem) 2.375rem;
   }
 }
 
-// Link text rises from behind a mask, like the hero headline.
+// Text odkazu vyjede zpoza masky, stejně jako nadpis v heru.
 .mobile-menu-reveal {
   translate: 0 110%;
   transition: translate 400ms $ease-in;
@@ -514,6 +593,7 @@ $menu-origin: calc(100% - 2.875rem) 2.375rem;
   }
 }
 
+// Šipky, kontakty a sítě se jen zobrazí (fade)
 .mobile-menu-fade {
   opacity: 0;
   transition: opacity 250ms ease-out;
@@ -524,6 +604,7 @@ $menu-origin: calc(100% - 2.875rem) 2.375rem;
   }
 }
 
+// Čára pod odkazem se „natáhne“ zleva
 .mobile-menu-line {
   scale: 0 1;
   transform-origin: left;
@@ -535,7 +616,11 @@ $menu-origin: calc(100% - 2.875rem) 2.375rem;
   }
 }
 
-// Cursor over projects: a light circle grows over the ring.
+// =============================================================================
+// 11. KURZOR A TLAČÍTKO
+// =============================================================================
+
+// Kurzor nad projekty: přes kroužek se zvětší světlé kolečko (SmoothCursor).
 .view-cursor {
   scale: 0;
   transition: scale 500ms $ease-out;
@@ -545,11 +630,10 @@ $menu-origin: calc(100% - 2.875rem) 2.375rem;
   }
 }
 
-// Contact form button. The dark fill rises over a light layer. If both were
-// cut by the same rounded edge, the smoothing of that edge would let a thin
-// light line through while the fill rises. So the button itself is dark and
-// the light layer sits 1px inside it: the fill always covers it fully, and
-// the 1px dark rim is invisible on the dark page.
+// Tlačítko Odeslat. Tmavá výplň vyjíždí přes světlou vrstvu. Kdyby obě měly
+// stejný zaoblený okraj, vyhlazení hrany by během animace propouštělo tenkou
+// světlou linku. Proto je samotné tlačítko tmavé a světlá vrstva je o 1px
+// uvnitř: výplň ji vždy zakryje celou a 1px tmavý okraj na tmavé stránce není vidět.
 .submit-button {
   background-color: #1f1f1f;
 
