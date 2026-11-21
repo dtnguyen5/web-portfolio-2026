@@ -24,10 +24,14 @@ const SmoothCursor = () => {
     // Over elements marked with `data-cursor="view"` a light "open" circle
     // grows over the ring.
     // The event target isn't always an Element (Firefox can report `document`
-    // or a text node), and those have no `closest`.
+    // or a text node), and those have no `closest`. Text nodes are resolved to
+    // their parent; anything else without `closest` counts as "not over a card".
     const updateView = (target: EventTarget | null) => {
-      const element = target instanceof Element ? target : null;
-      view.toggleAttribute("data-active", !!element?.closest('[data-cursor="view"]'));
+      const node = target as Node | null;
+      const element = (node?.nodeType === 3 ? node.parentElement : node) as Element | null;
+      const isOverView =
+        typeof element?.closest === "function" && !!element.closest('[data-cursor="view"]');
+      view.toggleAttribute("data-active", isOverView);
     };
 
     const moveCursor = (event: MouseEvent) => {

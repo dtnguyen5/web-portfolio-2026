@@ -5,7 +5,7 @@
 // 2) avatar.glb dej do: public/models/avatar.glb
 // 3) použij: <Avatar3D />  (rodič musí mít výšku, např. h-[600px])
 
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
 import { useGLTF, useAnimations, OrbitControls, ContactShadows, Environment } from '@react-three/drei'
 import { Suspense, useEffect, useRef, useState } from 'react'
 import * as THREE from 'three'
@@ -63,6 +63,28 @@ function Avatar({ dragging }: { dragging: React.RefObject<boolean> }) {
   )
 }
 
+const TARGET = new THREE.Vector3(0, 0.76, 0)
+// směr a vzdálenost kamery od postavičky (z boku, jako v Blenderu)
+const CAMERA_OFFSET = new THREE.Vector3(-2.1, 1.22 - 0.76, 3.2)
+// při tomhle poměru stran (šířka / výška) je postavička vidět celá i se židlí
+const FIT_ASPECT = 0.8
+
+// Namíří kameru na postavičku a podle poměru stran ji oddálí, aby se vešla
+// na úzké mobily i široké monitory. Bez toho by se na mobilu (kde OrbitControls
+// není) kamera dívala na podlahu a hlava by se ořízla.
+function CameraRig() {
+  const camera = useThree((s) => s.camera)
+  const aspect = useThree((s) => s.size.width / s.size.height)
+
+  useEffect(() => {
+    const zoomOut = Math.max(1, FIT_ASPECT / aspect)
+    camera.position.copy(TARGET).add(CAMERA_OFFSET.clone().multiplyScalar(zoomOut))
+    camera.lookAt(TARGET)
+  }, [camera, aspect])
+
+  return null
+}
+
 export default function Avatar3D() {
   // Na dotykových zařízeních OrbitControls blokuje scroll stránky (touch-action: none),
   // proto otáčení tažením povolíme jen pro myš.
@@ -76,6 +98,7 @@ export default function Avatar3D() {
   return (
     <div style={{ width: '100%', height: '100%' }}>
       <Canvas shadows camera={{ position: [-2.1, 1.22, 3.2], fov: 30 }} dpr={[1, 2]}>
+        <CameraRig />
         <Suspense fallback={null}>
           <Environment preset="studio" environmentIntensity={0.6} />
           <directionalLight position={[-1.8, 2.6, 1.8]} intensity={2} castShadow shadow-mapSize={[2048, 2048]} />
@@ -86,7 +109,7 @@ export default function Avatar3D() {
         {/* levé tlačítko myši = otáčení dokola (vodorovně bez omezení) */}
         <OrbitControls
           enabled={canOrbit}
-          target={[0, 0.76, 0]}
+          target={TARGET}
           enablePan={false}
           enableZoom={false}
           enableDamping
