@@ -23,7 +23,10 @@ const SmoothCursor = () => {
 
     // Over elements marked with `data-cursor="view"` a light "open" circle
     // grows over the ring.
-    const updateView = (element: Element | null) => {
+    // The event target isn't always an Element (Firefox can report `document`
+    // or a text node), and those have no `closest`.
+    const updateView = (target: EventTarget | null) => {
+      const element = target instanceof Element ? target : null;
       view.toggleAttribute("data-active", !!element?.closest('[data-cursor="view"]'));
     };
 
@@ -31,7 +34,7 @@ const SmoothCursor = () => {
       targetX = event.clientX;
       targetY = event.clientY;
       cursor.style.opacity = "1";
-      updateView(event.target as Element);
+      updateView(event.target);
     };
 
     // Scrolling moves the page under a still mouse, e.g. onto a project card.
