@@ -28,12 +28,12 @@ function Avatar({ dragging }: { dragging: React.RefObject<boolean> }) {
     // animace psaní z Blenderu (smyčka)
     actions['Typing']?.reset().play()
 
-    // stíny + najdi texturu displeje, ať po ní může rolovat kód
+    // najdi texturu displeje, ať po ní může rolovat kód
+    // (castShadow záměrně ne: stínová mapa pro 219 dílů modelu se počítala
+    // každý snímek a web kvůli ní sekal – stín pod židlí řeší ContactShadows)
     scene.traverse((o) => {
       const mesh = o as THREE.Mesh
       if (!mesh.isMesh) return
-      mesh.castShadow = true
-      mesh.receiveShadow = true
       const m = mesh.material as THREE.MeshStandardMaterial
       if (m?.name === 'Screen') {
         for (const t of [m.map, m.emissiveMap]) {
@@ -95,16 +95,45 @@ export default function Avatar3D() {
 
   const dragging = useRef(false)
 
+  // Výkon: scéna se vykresluje jen když je postavička (skoro) na obrazovce.
+  // Mimo ni se render úplně zastaví, takže nebrzdí animace ve zbytku webu.
+  // Model (3 MB) se navíc načte až když se k sekci blížíš, ne hned při načtení stránky.
+  const wrapper = useRef<HTMLDivElement>(null)
+  const [inView, setInView] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    const el = wrapper.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setInView(entry.isIntersecting)
+        if (entry.isIntersecting) setMounted(true)
+      },
+      { rootMargin: '300px 0px' },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
+
   return (
-    <div style={{ width: '100%', height: '100%' }}>
-      <Canvas shadows camera={{ position: [-2.1, 1.22, 3.2], fov: 30 }} dpr={[1, 2]}>
+    <div ref={wrapper} style={{ width: '100%', height: '100%' }}>
+      {mounted && (
+      <Canvas
+        frameloop={inView ? 'always' : 'never'}
+        camera={{ position: [-2.1, 1.22, 3.2], fov: 30 }}
+        // na retina displejích max 1.5× – rozdíl skoro není vidět, ale je to o ~45 % méně pixelů
+        dpr={[1, 1.5]}
+        gl={{ powerPreference: 'high-performance' }}
+      >
         <CameraRig />
         <Suspense fallback={null}>
           <Environment preset="studio" environmentIntensity={0.6} />
-          <directionalLight position={[-1.8, 2.6, 1.8]} intensity={2} castShadow shadow-mapSize={[2048, 2048]} />
+          <directionalLight position={[-1.8, 2.6, 1.8]} intensity={2} />
           <directionalLight position={[0.8, 2.2, -2.2]} intensity={1.2} />
           <Avatar dragging={dragging} />
-          <ContactShadows position={[0, 0, 0]} opacity={0.35} scale={3} blur={2.5} far={1.5} />
+          {/* frames={1}: stín se spočítá jen jednou, ne každý snímek (postavička sedí na místě) */}
+          <ContactShadows position={[0, 0, 0]} opacity={0.35} scale={3} blur={2.5} far={1.5} frames={1} />
         </Suspense>
         {/* levé tlačítko myši = otáčení dokola (vodorovně bez omezení) */}
         <OrbitControls
@@ -119,8 +148,7 @@ export default function Avatar3D() {
           onEnd={() => (dragging.current = false)}
         />
       </Canvas>
+      )}
     </div>
   )
 }
-
-useGLTF.preload(MODEL)
