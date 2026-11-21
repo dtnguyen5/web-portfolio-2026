@@ -114,7 +114,7 @@ export const projects: Project[] = [
     slug: "deliviet",
     name: "Deli Viet",
     type: "Web design",
-    image: "/DeliViet1.png",
+    image: "/DeliViet1-v2.png",
     imageRatio: "1440/900",
     mark: "Deli Viet",
     detail: {

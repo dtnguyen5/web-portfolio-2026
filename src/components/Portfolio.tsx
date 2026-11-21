@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { FormEvent, useEffect, useRef, useState } from "react";
 import { experience, tools } from "@/data/portfolio";
 import Arrow from "./Arrow";
@@ -10,6 +11,9 @@ import SectionLabel from "./SectionLabel";
 import ServiceList from "./ServiceList";
 import { contentPadding, fillHoverClass } from "./shared";
 import SiteFooter from "./SiteFooter";
+
+// three.js běží jen v prohlížeči – načteme ho bez SSR a v samostatném bundlu.
+const Avatar3D = dynamic(() => import("./Avatar3D"), { ssr: false });
 import SiteNav from "./SiteNav";
 import SmoothCursor from "./SmoothCursor";
 import SmoothScroll from "./SmoothScroll";
@@ -348,14 +352,14 @@ const Portfolio = () => {
         <SectionLabel>O MNĚ</SectionLabel>
         <div className="mt-10 grid gap-10 sm:mt-12 lg:grid-cols-[minmax(0,32.5rem)_1fr] lg:gap-[6.67vw]">
           <div className="about-sidebar">
-            <div className="about-sidebar-image relative h-110 overflow-hidden rounded-2xl bg-[#e7e7e7] sm:h-136 lg:h-170">
-              <Image
-                className="object-cover object-[50%_25%]"
-                src="/portrait.jpg"
-                alt="Nguyen Duy Tiep (Honza)"
-                fill
-                sizes="(max-width: 1024px) 100vw, 520px"
-              />
+            <div className="about-sidebar-image relative h-110 overflow-hidden rounded-2xl sm:h-136 lg:h-170">
+              <div
+                className="absolute inset-0"
+                role="img"
+                aria-label="3D postavička Honzy, jak píše na notebooku"
+              >
+                <Avatar3D />
+              </div>
             </div>
             <div className="mt-6 flex justify-between">
               <div className="flex flex-col gap-2">
